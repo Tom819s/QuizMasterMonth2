@@ -15,11 +15,10 @@ public class GameSetup extends AppCompatActivity {
     private TriviaDBURLcreator triviaURL;
     private RadioGroup categoriesRadio, difficultiesRadio;
     private NumberPicker numpicker;
-    int numQuestions;
 
     private static final String TAG = "GameSetup";
 
-    GameSetup() {
+    public GameSetup() {
         triviaURL = new TriviaDBURLcreator();
     }
 
