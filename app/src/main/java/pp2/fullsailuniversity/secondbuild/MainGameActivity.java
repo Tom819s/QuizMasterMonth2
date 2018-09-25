@@ -122,15 +122,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
         exit.setOnClickListener((view) ->
         {
-            gameTimer.cancel();
-            if (tickingSound.isPlaying()){
-                tickingSound.stop();
-                tickingSound.reset();
-            }
-            if (alarm.isPlaying()) {
-                alarm.stop();
-                alarm.reset();
-            }
             leaveGame();
 
         });
@@ -141,16 +132,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
 
-        if (tickingSound.isPlaying()){
-            tickingSound.stop();
-            tickingSound.reset();
-        }
-        if (alarm.isPlaying()) {
-            alarm.stop();
-            alarm.reset();
-        }
         leaveGame();
     }
 
@@ -558,62 +540,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         // Setting Negative "Cancel" Button
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                tickingSound.stop();
-                tickingSound.release();
-                tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
                 dialog.cancel();
-                gameTimer = new CountDownTimer(countdownMillis, 1000)
-                {
-
-                    public void onTick(long millisUntilFinished)
-                    {
-                        countdownMillis = millisUntilFinished;
-                        String count = Long.toString(millisUntilFinished / 1000);
-                        if (millisUntilFinished / 1000 > 15)
-                        {
-                            timerText.setTextColor(Color.rgb(0, 204, 0));
-                        }
-                        else if (millisUntilFinished / 1000 > 7)
-                        {
-                            timerText.setTextColor(Color.rgb(255, 204, 0));
-                        } else
-                        {
-                            if (!tickingSound.isPlaying()){
-                                tickingSound.start();
-                            }
-
-                            timerText.setTextColor(Color.rgb(204, 0, 0));
-                        }
-                        timerText.setText(count);
-                    }
-
-                    public void onFinish()
-                    {
-                        tickingSound.stop();
-                        alarm.setVolume(5.0f, 5.0f);
-                        alarm.start();
-                        timerText.setText("Time's Up!");
-                        b1.setEnabled(false);
-                        b2.setEnabled(false);
-                        b3.setEnabled(false);
-                        b4.setEnabled(false);
-                        next.setEnabled(true);
-
-                        if (b1.getTag() == "true")
-                            b1.setBackgroundColor(Color.GREEN);
-                        else if (b2.getTag() == "true")
-                            b2.setBackgroundColor(Color.GREEN);
-                        else if (b3.getTag() == "true")
-                            b3.setBackgroundColor(Color.GREEN);
-                        else if (b4.getTag() == "true")
-                            b4.setBackgroundColor(Color.GREEN);
-
-                        int temp = i.get() + 1;
-                        scorecounter.setText(score.toString() + "/" + Integer.toString(temp));
-
-                    }
-
-                }.start();
             }
         });
 
