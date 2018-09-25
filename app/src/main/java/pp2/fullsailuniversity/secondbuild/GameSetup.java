@@ -12,15 +12,17 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 public class GameSetup extends AppCompatActivity {
-private TriviaDBURLcreator triviaURL;
-private RadioGroup categoriesRadio, difficultiesRadio;
-private NumberPicker numpicker;
-int numQuestions;
+    private TriviaDBURLcreator triviaURL;
+    private RadioGroup categoriesRadio, difficultiesRadio;
+    private NumberPicker numpicker;
+    int numQuestions;
 
     private static final String TAG = "GameSetup";
-GameSetup(){
-    triviaURL = new TriviaDBURLcreator();
-}
+
+    GameSetup() {
+        triviaURL = new TriviaDBURLcreator();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,20 +59,18 @@ GameSetup(){
 
 
     public void playButtonHandler(View view) {
-    try{
-        int catID = categoriesRadio.getCheckedRadioButtonId();
-        triviaURL.mCategory = findViewById(catID).getTag().toString();
-        int diffID = difficultiesRadio.getCheckedRadioButtonId();
-        triviaURL.mDifficulty = findViewById(diffID).getTag().toString();
-        triviaURL.mNumQuestions = numpicker.getValue();
-        MainGameActivity.urlToAPI = triviaURL.createURL();
-    }
-    catch(java.io.IOException e )
-    {
-        e.printStackTrace();
-        Log.d(TAG, "playButtonHandler: io exception creating url");
-    }
-        Intent goToGame = new Intent(this,MainGameActivity.class);
+        try {
+            int catID = categoriesRadio.getCheckedRadioButtonId();
+            triviaURL.mCategory = findViewById(catID).getTag().toString();
+            int diffID = difficultiesRadio.getCheckedRadioButtonId();
+            triviaURL.mDifficulty = findViewById(diffID).getTag().toString();
+            triviaURL.mNumQuestions = numpicker.getValue();
+            MainGameActivity.urlToAPI = triviaURL.createURL();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "playButtonHandler: io exception creating url");
+        }
+        Intent goToGame = new Intent(this, MainGameActivity.class);
         startActivity(goToGame);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }

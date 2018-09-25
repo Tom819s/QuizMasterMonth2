@@ -22,8 +22,9 @@ public class MainMenu extends AppCompatActivity
 
     private static final String TAG = "Main Menu";
 
-public ImageButton quickStart;
-public Button multi, lobby;
+    public ImageButton quickStart;
+    public Button multi, lobby;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,14 +52,13 @@ public Button multi, lobby;
                 triviaURL.mNumQuestions = 10;
                 triviaURL.mDifficulty = "ANYDIFF";
                 triviaURL.mCategory = "ANY";
-                try{
-                MainGameActivity.urlToAPI = triviaURL.createURL();
+                try {
+                    MainGameActivity.urlToAPI = triviaURL.createURL();
                     finish();
                     Intent goToGame = new Intent(MainMenu.this, MainGameActivity.class);
                     startActivity(goToGame);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                }
-                catch (java.io.IOException e){
+                } catch (java.io.IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "quickStart IOException");
                 }
@@ -134,7 +134,7 @@ public Button multi, lobby;
 
     public void SoloButtonH(View view) {
 
-        Intent gotToGameSetup = new Intent(this,GameSetup.class);
+        Intent gotToGameSetup = new Intent(this, GameSetup.class);
         startActivity(gotToGameSetup);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 

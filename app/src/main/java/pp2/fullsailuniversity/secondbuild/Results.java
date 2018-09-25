@@ -9,14 +9,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class Results extends AppCompatActivity
-{
+public class Results extends AppCompatActivity {
     public static int score, totalquestions;
     Button menu, retry;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.results_screen);
         ImageView passedImage = findViewById(R.id.passedimage);
@@ -29,19 +27,16 @@ public class Results extends AppCompatActivity
         totalquestions = MainGameActivity.i.get() + 1;
 
 
-        int resultPercentInt = ( score*100 / totalquestions);
+        int resultPercentInt = (score * 100 / totalquestions);
 
-        if (resultPercentInt > 69)
-        {
+        if (resultPercentInt > 69) {
 
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             passedImage.setAlpha(1.0f);
             failedImage.setAlpha(0.0f);
             resultsText.setText("You passed the quiz with " + resultPercentInt + "%");
-        }
-        else
-        {
+        } else {
 
             MediaPlayer booSound = MediaPlayer.create(this, R.raw.boo);
             booSound.start();

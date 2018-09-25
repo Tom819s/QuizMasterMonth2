@@ -304,7 +304,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected void onPostExecute(final Boolean success) {
-            Intent goToMainMenu = new Intent(LoginActivity.this,MainMenu.class);
+            Intent goToMainMenu = new Intent(LoginActivity.this, MainMenu.class);
 
             mAuthTask = null;
             showProgress(false);
