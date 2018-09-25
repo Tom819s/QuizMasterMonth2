@@ -10,7 +10,7 @@ public class TriviaDBURLcreator {
         int categoryAsInt;
         StringBuilder newURL = new StringBuilder();
         newURL.append("https://opentdb.com/api.php");
-        if (mNumQuestions >= 9 && mNumQuestions <= 30) {
+        if (mNumQuestions > 9 && mNumQuestions <= 30) {
             newURL.append("?amount=" + mNumQuestions);
         } else //by default gets 10 questions otherwise
             newURL.append("?amount=10");

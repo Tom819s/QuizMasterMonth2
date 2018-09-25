@@ -34,7 +34,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private Button next,
             exit,
             b1, b2, b3, b4;
-    private Long countdownMillis;
     private ImageButton startbtn;
     private CountDownTimer gameTimer;
     private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
@@ -172,7 +171,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             gameTimer = new CountDownTimer(21000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
-                    countdownMillis = millisUntilFinished;
                     String count = Long.toString(millisUntilFinished / 1000);
                     if (millisUntilFinished / 1000 > 10) {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
