@@ -1,9 +1,11 @@
 package pp2.fullsailuniversity.secondbuild;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Button;
@@ -33,6 +35,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private Button next,
             exit,
             b1, b2, b3, b4;
+    private Long countdownMillis;
     private ImageButton startbtn;
     private CountDownTimer gameTimer;
     private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
@@ -128,10 +131,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                 alarm.stop();
                 alarm.reset();
             }
-            finish();
-            Intent goToGame = new Intent(MainGameActivity.this, MainMenu.class);
-            startActivity(goToGame);
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            leaveGame();
+
         });
 
         Log.d(TAG, "onCreate: ends");
@@ -141,7 +142,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        gameTimer.cancel();
+
         if (tickingSound.isPlaying()){
             tickingSound.stop();
             tickingSound.reset();
@@ -150,6 +151,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             alarm.stop();
             alarm.reset();
         }
+        leaveGame();
     }
 
     @Override
@@ -191,29 +193,34 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
         if (quiz != null && index < quiz.size())
         {
-            gameTimer = new CountDownTimer(21000, 1000)
-            {
+            tickingSound.stop();
+                    tickingSound.release();
+                    tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
 
-                public void onTick(long millisUntilFinished)
-                {
-                    String count = Long.toString(millisUntilFinished / 1000);
-                    if (millisUntilFinished / 1000 > 15)
+                    gameTimer = new CountDownTimer(21000, 1000)
                     {
-                        timerText.setTextColor(Color.rgb(0, 204, 0));
-                    }
-                    else if (millisUntilFinished / 1000 > 7)
-                    {
-                        timerText.setTextColor(Color.rgb(255, 204, 0));
-                    } else
-                    {
-                        if (!tickingSound.isPlaying()){
-                            tickingSound.setVolume(5.0f,5.0f);
-                            tickingSound.start();
-                        }
 
-                        timerText.setTextColor(Color.rgb(204, 0, 0));
-                    }
-                    timerText.setText(count);
+                        public void onTick(long millisUntilFinished)
+                        {
+                            countdownMillis = millisUntilFinished;
+                            String count = Long.toString(millisUntilFinished / 1000);
+                            if (millisUntilFinished / 1000 > 15)
+                            {
+                                timerText.setTextColor(Color.rgb(0, 204, 0));
+                            }
+                            else if (millisUntilFinished / 1000 > 7)
+                            {
+                                timerText.setTextColor(Color.rgb(255, 204, 0));
+                            } else
+                            {
+                                if (!tickingSound.isPlaying()){
+                                    tickingSound.setVolume(5.0f,5.0f);
+                                    tickingSound.start();
+                                }
+
+                                timerText.setTextColor(Color.rgb(204, 0, 0));
+                            }
+                            timerText.setText(count);
                 }
 
                 public void onFinish()
@@ -539,5 +546,88 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         }
     }
 
+    public void leaveGame(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainGameActivity.this);
+
+        builder.setCancelable(true);
+        builder.setCancelable(false);
+        builder.setTitle("Leave Game");
+        builder.setMessage("Are you sure you want to leave the game?");
+
+        // Setting Negative "Cancel" Button
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                tickingSound.stop();
+                tickingSound.release();
+                tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
+                dialog.cancel();
+                gameTimer = new CountDownTimer(countdownMillis, 1000)
+                {
+
+                    public void onTick(long millisUntilFinished)
+                    {
+                        countdownMillis = millisUntilFinished;
+                        String count = Long.toString(millisUntilFinished / 1000);
+                        if (millisUntilFinished / 1000 > 15)
+                        {
+                            timerText.setTextColor(Color.rgb(0, 204, 0));
+                        }
+                        else if (millisUntilFinished / 1000 > 7)
+                        {
+                            timerText.setTextColor(Color.rgb(255, 204, 0));
+                        } else
+                        {
+                            if (!tickingSound.isPlaying()){
+                                tickingSound.start();
+                            }
+
+                            timerText.setTextColor(Color.rgb(204, 0, 0));
+                        }
+                        timerText.setText(count);
+                    }
+
+                    public void onFinish()
+                    {
+                        tickingSound.stop();
+                        alarm.setVolume(5.0f, 5.0f);
+                        alarm.start();
+                        timerText.setText("Time's Up!");
+                        b1.setEnabled(false);
+                        b2.setEnabled(false);
+                        b3.setEnabled(false);
+                        b4.setEnabled(false);
+                        next.setEnabled(true);
+
+                        if (b1.getTag() == "true")
+                            b1.setBackgroundColor(Color.GREEN);
+                        else if (b2.getTag() == "true")
+                            b2.setBackgroundColor(Color.GREEN);
+                        else if (b3.getTag() == "true")
+                            b3.setBackgroundColor(Color.GREEN);
+                        else if (b4.getTag() == "true")
+                            b4.setBackgroundColor(Color.GREEN);
+
+                        int temp = i.get() + 1;
+                        scorecounter.setText(score.toString() + "/" + Integer.toString(temp));
+
+                    }
+
+                }.start();
+            }
+        });
+
+        // Setting Positive "Yes" Button
+        builder.setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent menuActivity = new Intent(MainGameActivity.this, MainMenu.class);
+                finish();
+                startActivity(menuActivity);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        });
+
+        builder.show();
+    }
 
 }
