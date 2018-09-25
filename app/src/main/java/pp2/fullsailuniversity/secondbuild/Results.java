@@ -12,7 +12,7 @@ import android.widget.TextView;
 public class Results extends AppCompatActivity
 {
     public static int score, totalquestions;
-    Button menu;
+    Button menu, retry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -24,6 +24,7 @@ public class Results extends AppCompatActivity
         TextView resultsText = findViewById(R.id.resultsText);
 
         menu = findViewById(R.id.return_to_menu);
+        retry = findViewById(R.id.retryGame);
         score = MainGameActivity.score.get();
         totalquestions = MainGameActivity.i.get() + 1;
 
@@ -53,6 +54,15 @@ public class Results extends AppCompatActivity
             Intent toMainMenu = new Intent(Results.this, MainMenu.class);
             finish();
             startActivity(toMainMenu);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+
+
+        });
+        retry.setOnClickListener((View) ->
+        {
+            Intent toMainGame = new Intent(Results.this, MainGameActivity.class);
+            finish();
+            startActivity(toMainGame);
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 
 
