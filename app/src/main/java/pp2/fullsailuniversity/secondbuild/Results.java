@@ -29,20 +29,21 @@ public class Results extends AppCompatActivity {
 
         int points = (score / totalquestions);
 
-        if (points > 6 ) {
-
+        if (points > 4)
+        {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             passedImage.setAlpha(1.0f);
             failedImage.setAlpha(0.0f);
-            resultsText.setText("You passed the quiz with " + score + " points");
-        } else {
-
+            resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
+        }
+        else
+        {
             MediaPlayer booSound = MediaPlayer.create(this, R.raw.boo);
             booSound.start();
             passedImage.setAlpha(0.0f);
             failedImage.setAlpha(1.0f);
-            resultsText.setText("You failed the quiz with " + score + " points");
+            resultsText.setText("You failed the quiz with " + score + " points from " + totalquestions + " questions");
         }
         menu.setOnClickListener((View) ->
         {

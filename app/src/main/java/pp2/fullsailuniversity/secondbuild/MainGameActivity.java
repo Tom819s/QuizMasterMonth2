@@ -327,7 +327,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                 gameTimer = new CountDownTimer(5000, 1000) {
                     @Override
                     public void onTick(long millisUntilFinished) {
-
+                        //do nothing
                     }
 
                     @Override
