@@ -24,25 +24,25 @@ public class Results extends AppCompatActivity {
         menu = findViewById(R.id.return_to_menu);
         retry = findViewById(R.id.retryGame);
         score = MainGameActivity.score.get();
-        totalquestions = MainGameActivity.i.get() + 1;
+        totalquestions = MainGameActivity.i.get();
 
 
-        int resultPercentInt = (score * 100 / totalquestions);
+        int points = (score / totalquestions);
 
-        if (resultPercentInt > 69) {
+        if (points > 6 ) {
 
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             passedImage.setAlpha(1.0f);
             failedImage.setAlpha(0.0f);
-            resultsText.setText("You passed the quiz with " + resultPercentInt + "%");
+            resultsText.setText("You passed the quiz with " + score + " points");
         } else {
 
             MediaPlayer booSound = MediaPlayer.create(this, R.raw.boo);
             booSound.start();
             passedImage.setAlpha(0.0f);
             failedImage.setAlpha(1.0f);
-            resultsText.setText("You failed the quiz with " + resultPercentInt + "%");
+            resultsText.setText("You failed the quiz with " + score + " points");
         }
         menu.setOnClickListener((View) ->
         {

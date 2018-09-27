@@ -97,8 +97,7 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
         }
 
         if (runningOnSameThread && mCallBack != null) {
-            // now inform the caller that processing is done - possibly returning null if there
-            // was an error
+            // now inform the caller that processing is done - possibly returning null if there was an error
             mCallBack.onDataAvailable(mQuiz, status);
         }
 
