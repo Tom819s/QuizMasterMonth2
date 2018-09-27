@@ -37,7 +37,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             exit,
             b1, b2, b3, b4;
     private ImageButton startbtn;
-    private CountDownTimer gameTimer;
+    private CountDownTimer gameTimer, timesup;
     private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
 
 
@@ -243,7 +243,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                         scorecounter.setText(score.toString());
 
-                        CountDownTimer timesup = new CountDownTimer(5000, 1000) {
+                        timesup = new CountDownTimer(5000, 1000) {
                             @Override
                             public void onTick(long millisUntilFinished) {
 
@@ -339,6 +339,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                 {
                     gameTimer.cancel();
+                    if (timesup != null)
+                        timesup.cancel();
                     next.setEnabled(false);
 
                     if (i.get() < quiz.size() - 1) {
