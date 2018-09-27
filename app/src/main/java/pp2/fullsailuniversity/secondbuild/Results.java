@@ -27,9 +27,9 @@ public class Results extends AppCompatActivity {
         totalquestions = MainGameActivity.i.get();
 
 
-        int points = (score / totalquestions);
+        float points = ((float)score / (float)totalquestions);
 
-        if (points > 4)
+        if (points > 4.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
