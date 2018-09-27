@@ -67,7 +67,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
 
-        scorecounter.setText("");
+        scorecounter.setText("0");
         timerText.setText(" ");
         question.setText("");
         next.setEnabled(false);
@@ -413,13 +413,14 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                     } else {
-                        b1.setBackgroundColor(Color.LTGRAY);
+
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
+
                         wrongSound.start();
                         timerText.setText("Wrong!");
-                        timerText.setTextColor(Color.RED);
+                        timerText.setTextColor(Color.rgb(255,0,0));
                         b1.setBackgroundColor(Color.RED);
                         if (b2.getTag() == "true")
                             b2.setBackgroundColor(Color.GREEN);
@@ -501,13 +502,15 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b4.setBackgroundColor(Color.LTGRAY);
                         wrongSound.start();
                         timerText.setText("Wrong!");
-                        timerText.setTextColor(Color.RED);
+                        timerText.setTextColor(Color.rgb(255,0,0));
+
                         if (b1.getTag() == "true")
                             b1.setBackgroundColor(Color.GREEN);
                         else if (b3.getTag() == "true")
                             b3.setBackgroundColor(Color.GREEN);
                         else if (b4.getTag() == "true")
                             b4.setBackgroundColor(Color.GREEN);
+
                         b2.setBackgroundColor(Color.RED);
 //                    Context context = getApplicationContext();
 //                    CharSequence text = "Wrong!";
@@ -587,6 +590,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         else if (b4.getTag() == "true")
                             b4.setBackgroundColor(Color.GREEN);
                         b3.setBackgroundColor(Color.RED);
+                        timerText.setTextColor(Color.RED);
                         timerText.setText("Wrong!");
 //                    timerText.setTextColor(Color.RED);
 //                    Context context = getApplicationContext();
