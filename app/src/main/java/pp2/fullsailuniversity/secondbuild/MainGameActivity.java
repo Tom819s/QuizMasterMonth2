@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -62,8 +63,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         startbtn = findViewById(R.id.start_button);
         timerText = findViewById(R.id.timerTextView);
 
-        correctSound = MediaPlayer.create(this, R.raw.correct);
-        wrongSound = MediaPlayer.create(this, R.raw.wrong);
+        correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
+        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.wrong);
         tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
 
@@ -101,9 +102,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
             }
-        };
-
-        gameTimer.start();
+        }.start();
 
 
         startbtn.setOnClickListener(v ->
@@ -122,7 +121,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         exit.setOnClickListener((view) ->
         {
             leaveGame();
-
         });
 
         Log.d(TAG, "onCreate: ends");
@@ -172,31 +170,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
 
             List<Button> buttons = new ArrayList<Button>();
-            List<Button> hintButtons = new ArrayList<Button>();
-
             buttons.add(b1);
             buttons.add(b2);
             buttons.add(b3);
             buttons.add(b4);
 
-            CountDownTimer hintTimer = new CountDownTimer(4800, 400) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    for (int i = 0; i < hintButtons.size(); ++i) {
-                        if ((int)(Math.random() * 1000) % 2 == 0)
-                            hintButtons.get(i).setBackgroundColor(Color.RED);
-                        else
-                            hintButtons.get(i).setBackgroundColor(Color.GREEN);
-                    }
-                }
-
-                @Override
-                public void onFinish() {
-                    for (int i = 0; i < hintButtons.size(); ++i) {
-                        hintButtons.get(i).setBackgroundColor(Color.LTGRAY);
-                    }
-                }
-            };
 
             gameTimer = new CountDownTimer(21000, 1000) {
 
@@ -211,11 +189,9 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         if (!tickingSound.isPlaying()) {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
-                            hintTimer.start();
+                            buttons.get(0).setEnabled(false);
+                            buttons.get(1).setEnabled(false);
                         }
-
-
-
                             timerText.setTextColor(Color.rgb(204, 0, 0));
                         }
                         timerText.setText(count);
@@ -286,9 +262,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             b4.setBackgroundColor(Color.LTGRAY);
 
             question.setText(quiz.get(index).questionString);
-            quiz.get(index).
-
-                RandomizeQuestionOrder();
+            quiz.get(index).RandomizeQuestionOrder();
 
             b1.setText(quiz.get(index).answers[0].m_answer);
             b2.setText(quiz.get(index).answers[1].m_answer);
@@ -327,12 +301,12 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             for (int i = 0; i < buttons.size(); ++i) {
 
                 if (buttons.get(i).getTag() == "true") {
-                    hintButtons.add(buttons.get(i));
                     buttons.remove(i);
                 }
             }
+
             int randomIndex = (int) (Math.random() * 1000) % 3;
-            hintButtons.add(buttons.get(randomIndex));
+            buttons.remove(randomIndex);
 
 // set string values for the questions
             next.setOnClickListener((view)->
@@ -373,7 +347,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         alarm.stop();
                         alarm.reset();
                     }
-                    hintTimer.cancel();
 
                     b1.setEnabled(false);
                     b2.setEnabled(false);
@@ -445,7 +418,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                 {
 
-                    hintTimer.cancel();
                     if (tickingSound.isPlaying()) {
                         tickingSound.stop();
                         tickingSound.reset();
@@ -528,7 +500,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             b3.setOnClickListener((view)->
 
                 {
-                    hintTimer.cancel();
                     if (tickingSound.isPlaying()) {
                         tickingSound.stop();
                         tickingSound.reset();
@@ -608,7 +579,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             b4.setOnClickListener((view)->
                 {
 
-                    hintTimer.cancel();
                     if (tickingSound.isPlaying()) {
                         tickingSound.stop();
                         tickingSound.reset();
