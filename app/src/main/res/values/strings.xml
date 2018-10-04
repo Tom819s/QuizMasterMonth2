@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Trivia Master</string>
+    <string name="app_name">Trivia Mastery</string>
     <string name="guest_login">Login</string>
     <string name="title_activity_login">Sign in</string>
 

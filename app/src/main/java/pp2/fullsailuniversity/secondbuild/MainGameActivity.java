@@ -1,14 +1,17 @@
 package pp2.fullsailuniversity.secondbuild;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -33,7 +36,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private long millisToAnswer;
     private TextView question;
     private TextView timerText;
-    private TextView scorecounter;
+    private TextView scorecounter, questioncounter;
     private Button next,
             exit,
             b1, b2, b3, b4;
@@ -56,6 +59,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         b2 = findViewById(R.id.button2);
         b3 = findViewById(R.id.button3);
         b4 = findViewById(R.id.button4);
+        questioncounter = findViewById(R.id.questionNumber);
         scorecounter = findViewById(R.id.score);
         question = findViewById(R.id.textView);
         next = findViewById(R.id.nextB);
@@ -63,12 +67,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         startbtn = findViewById(R.id.start_button);
         timerText = findViewById(R.id.timerTextView);
 
+
         correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
         wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.wrong);
         tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
 
-        scorecounter.setText("0");
+        scorecounter.setText("Score: 0");
         timerText.setText(" ");
         question.setText("");
         next.setEnabled(false);
@@ -153,6 +158,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
     public void GameLoop(int index) {
 
+        questioncounter.setText("Question: " + (index+1));
 
         if (tickingSound.isPlaying()) {
             tickingSound.stop();
@@ -217,7 +223,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         else if (b4.getTag() == "true")
                             b4.setBackgroundColor(Color.GREEN);
 
-                        scorecounter.setText(score.toString());
+                        scorecounter.setText("Score: " + score.toString());
 
                         timesup = new CountDownTimer(5000, 1000) {
                             @Override
@@ -250,10 +256,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             b3.setClickable(true);
             b4.setClickable(true);
 
-            b1.setAlpha(1.0f);
-            b2.setAlpha(1.0f);
-            b3.setAlpha(1.0f);
-            b4.setAlpha(1.0f);
+            b1.setAlpha(0.7f);
+            b2.setAlpha(0.7f);
+            b3.setAlpha(0.7f);
+            b4.setAlpha(0.7f);
 
 
             b1.setBackgroundColor(Color.LTGRAY);
@@ -370,13 +376,12 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
                         correctSound.start();
-                        if (millisToAnswer < 4000)
-                            score.set(score.get() + 10);
-                        else if (millisToAnswer < 10000)
+                        if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
+                        else if (millisToAnswer < 10000)
+                            score.set(score.get() + 3);
                         else
                             score.set(score.get() + 1);
-
                         b1.setBackgroundColor(Color.GREEN);
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
@@ -410,7 +415,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //                    toast.show();
                     }
 
-                    scorecounter.setText(score.toString());
+                    scorecounter.setText("Score: " + score.toString());
                 });
 
 
@@ -452,10 +457,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         correctSound.start();
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 4000)
-                            score.set(score.get() + 10);
-                        else if (millisToAnswer < 10000)
+                        if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
+                        else if (millisToAnswer < 10000)
+                            score.set(score.get() + 3);
                         else
                             score.set(score.get() + 1);
                         b1.setBackgroundColor(Color.LTGRAY);
@@ -493,7 +498,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                     }
-                    scorecounter.setText(score.toString());
+                    scorecounter.setText("Score: " + score.toString());
                 });
 
 
@@ -531,10 +536,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                     if (b3.getTag() == "true") {
                         correctSound.start();
-                        if (millisToAnswer < 4000)
-                            score.set(score.get() + 10);
-                        else if (millisToAnswer < 10000)
+                        if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
+                        else if (millisToAnswer < 10000)
+                            score.set(score.get() + 3);
                         else
                             score.set(score.get() + 1);
                         timerText.setText("Correct!");
@@ -573,7 +578,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                     }
-                    scorecounter.setText(score.toString());
+                    scorecounter.setText("Score: " + score.toString());
                 });
 
             b4.setOnClickListener((view)->
@@ -612,10 +617,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         correctSound.start();
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 4000)
-                            score.set(score.get() + 10);
-                        else if (millisToAnswer < 10000)
+                        if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
+                        else if (millisToAnswer < 10000)
+                            score.set(score.get() + 3);
                         else
                             score.set(score.get() + 1);
                         b1.setBackgroundColor(Color.LTGRAY);
@@ -633,6 +638,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
+
                         wrongSound.start();
                         timerText.setText("Wrong!");
                         timerText.setTextColor(Color.RED);
@@ -650,7 +656,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                     }
-                    scorecounter.setText(score.toString());
+                    scorecounter.setText("Score: " + score.toString());
 
                 });
             }

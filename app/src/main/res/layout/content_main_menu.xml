@@ -4,89 +4,81 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@android:style/Theme"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainMenu"
+    android:background="#eaf5ff"
     tools:showIn="@layout/app_bar_main_menu">
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
+        android:id="@+id/textView6"
+        android:layout_width="324dp"
+        android:layout_height="89dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="casual"
+        android:gravity="center_vertical|center_horizontal"
         android:text="@string/app_name"
-        android:textAlignment="center"
-        android:textSize="30sp"
+        android:textAppearance="@android:style/TextAppearance.Material.Headline"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:textSize="36sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.027" />
+        app:layout_constraintVertical_bias="0.069" />
 
-    <ImageButton
+    <Button
         android:id="@+id/quickstartButton"
-        android:layout_width="239dp"
-        android:layout_height="119dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="250dp"
+        android:layout_height="42dp"
+        android:layout_marginBottom="108dp"
         android:adjustViewBounds="false"
-        android:background="@drawable/common_full_open_on_phone"
         android:scaleType="centerInside"
+        android:text="Quick Start"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.928"
-        app:srcCompat="@drawable/startgreenbanner" />
+        app:layout_constraintEnd_toEndOf="@+id/lobbyPB"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/lobbyPB" />
 
     <Button
         android:id="@+id/multiPB"
         android:layout_width="250dp"
         android:layout_height="43dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="65dp"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="92dp"
         android:text="@string/gm_multiplayer"
         app:layout_constraintBottom_toTopOf="@+id/quickstartButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="0.482" />
+        app:layout_constraintEnd_toEndOf="@+id/singlePB"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/singlePB" />
 
     <Button
         android:id="@+id/singlePB"
         android:layout_width="250dp"
         android:layout_height="43dp"
-        android:layout_marginEnd="65dp"
-        android:layout_marginStart="65dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:onClick="SoloButtonH"
         android:text="Custom Match"
-        app:layout_constraintBottom_toTopOf="@+id/quickstartButton"
+        app:layout_constraintBottom_toTopOf="@+id/multiPB"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="0.175" />
+        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        app:layout_constraintVertical_bias="0.885" />
 
     <Button
         android:id="@+id/lobbyPB"
         android:layout_width="250dp"
         android:layout_height="43dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="65dp"
-        android:layout_marginStart="65dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
         android:text="@string/gp_lobby_match"
         app:layout_constraintBottom_toTopOf="@+id/quickstartButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="0.788" />
+        app:layout_constraintEnd_toEndOf="@+id/multiPB"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/multiPB" />
 
 </android.support.constraint.ConstraintLayout>

@@ -22,7 +22,7 @@ public class MainMenu extends AppCompatActivity
 
     private static final String TAG = "Main Menu";
 
-    public ImageButton quickStart;
+    public Button quickStart;
     public Button multi, lobby;
 
     @Override
@@ -35,13 +35,22 @@ public class MainMenu extends AppCompatActivity
         multi = findViewById(R.id.multiPB);
         lobby = findViewById(R.id.lobbyPB);
         multi.setEnabled(false);
-        lobby.setEnabled(false);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Stay Tuned For Upcoming Content", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+            }
+        });
+
+        lobby.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent gotToGameSetup = new Intent(MainMenu.this, SetupMultiplayer.class);
+                startActivity(gotToGameSetup);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 

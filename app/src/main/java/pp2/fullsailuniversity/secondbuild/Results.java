@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,9 +18,9 @@ public class Results extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.results_screen);
-        ImageView passedImage = findViewById(R.id.passedimage);
-        ImageView failedImage = findViewById(R.id.failedimage);
+        ImageView gradeImage = findViewById(R.id.quizGrade);
         TextView resultsText = findViewById(R.id.resultsText);
+        TextView criteriaText = findViewById(R.id.gradeCriteria);
 
         menu = findViewById(R.id.return_to_menu);
         retry = findViewById(R.id.retryGame);
@@ -28,22 +29,41 @@ public class Results extends AppCompatActivity {
 
 
         float points = ((float)score / (float)totalquestions);
-
-        if (points > 4.0f)
+        criteriaText.setText("Points Needed:\nA: " + (int)(totalquestions*3 + 1) + "\nB: " + (int)(totalquestions*2.5 + 1)+
+                "\nC: " + (int)(totalquestions*1.5 + 1) + "\nD: " + (int)(totalquestions*1 + 1));
+        if (points > 3.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
-            passedImage.setAlpha(1.0f);
-            failedImage.setAlpha(0.0f);
+            gradeImage.setImageResource(R.drawable.grade_a);
             resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
         }
-        else
+        else if (points > 2.5f)
         {
-            MediaPlayer booSound = MediaPlayer.create(this, R.raw.boo);
-            booSound.start();
-            passedImage.setAlpha(0.0f);
-            failedImage.setAlpha(1.0f);
-            resultsText.setText("You failed the quiz with " + score + " points from " + totalquestions + " questions");
+            MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
+            cheerSound.start();
+            gradeImage.setImageResource(R.drawable.grade_b);
+            resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
+        }
+        else if (points > 1.5f)
+        {
+            MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
+            cheerSound.start();
+            gradeImage.setImageResource(R.drawable.grade_c);
+            resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
+        }
+        else if (points > 1.0f)
+        {
+            MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
+            cheerSound.start();
+            gradeImage.setImageResource(R.drawable.grade_d);
+            resultsText.setText("You barely passed the quiz with " + score + " points from " + totalquestions + " questions");
+        }
+        else{
+                MediaPlayer booSound = MediaPlayer.create(this, R.raw.boo);
+                booSound.start();
+                gradeImage.setImageResource(R.drawable.grade_f);
+                resultsText.setText("You failed the quiz with " + score + " points from " + totalquestions + " questions");
         }
         menu.setOnClickListener((View) ->
         {

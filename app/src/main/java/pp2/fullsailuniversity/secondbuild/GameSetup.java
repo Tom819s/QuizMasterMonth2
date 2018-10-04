@@ -56,6 +56,14 @@ public class GameSetup extends AppCompatActivity {
         diffAll.setTag("ANY");
     }
 
+    @Override
+    public void onBackPressed() {
+
+        Intent results = new Intent(this, MainMenu.class);
+        finish();
+        startActivity(results);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
 
     public void playButtonHandler(View view) {
         try {
