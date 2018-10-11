@@ -10,11 +10,15 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameSetup extends AppCompatActivity {
     private TriviaDBURLcreator triviaURL;
     private RadioGroup categoriesRadio, difficultiesRadio;
-    private NumberPicker numpicker;
+    private NumberPicker numpicker, timepicker;
+    private Switch hintsOn;
 
     private static final String TAG = "GameSetup";
 
@@ -33,6 +37,13 @@ public class GameSetup extends AppCompatActivity {
         numpicker.setMinValue(10);
         numpicker.setMaxValue(30);
         numpicker.setValue(10);
+
+        timepicker = findViewById(R.id.timePicker);
+        timepicker.setMinValue(10);
+        timepicker.setMaxValue(30);
+        timepicker.setValue(20);
+
+        hintsOn = findViewById(R.id.switch1);
 
 
         RadioButton catAll = findViewById(R.id.radioAny);
@@ -77,7 +88,12 @@ public class GameSetup extends AppCompatActivity {
             e.printStackTrace();
             Log.d(TAG, "playButtonHandler: io exception creating url");
         }
+        if (hintsOn.isChecked())
+            MainGameActivity.hints = true;
+        else
+            MainGameActivity.hints = false;
         Intent goToGame = new Intent(this, MainGameActivity.class);
+        goToGame.putExtra("myKey", timepicker.getValue());
         startActivity(goToGame);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }

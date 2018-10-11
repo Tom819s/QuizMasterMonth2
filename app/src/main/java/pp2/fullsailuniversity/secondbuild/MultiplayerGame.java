@@ -60,7 +60,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         b3 = findViewById(R.id.button3);
         b4 = findViewById(R.id.button4);
         scorecounter = findViewById(R.id.score);
-        question = findViewById(R.id.textView);
+        question = findViewById(R.id.userEmail);
         next = findViewById(R.id.nextB);
         exit = findViewById(R.id.exitB);
         startbtn = findViewById(R.id.start_button);

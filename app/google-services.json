@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "431275444072",
+    "firebase_url": "https://api-7037170500861249898-680334.firebaseio.com",
+    "project_id": "api-7037170500861249898-680334",
+    "storage_bucket": "api-7037170500861249898-680334.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:431275444072:android:3b2950faf0208ae2",
+        "android_client_info": {
+          "package_name": "pp2.fullsailuniversity.secondbuild"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "431275444072-1ngh9htqs49ugbe8q3n1b9ehc5ejmbah.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pp2.fullsailuniversity.secondbuild",
+            "certificate_hash": "6cdaf61dac33039adc1c2064d8dbfd4b179f5013"
+          }
+        },
+        {
+          "client_id": "431275444072-b87tl98ijl87rae23t4gdr0alk6j8tr2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "pp2.fullsailuniversity.secondbuild",
+            "certificate_hash": "bb8e83e4a9c0a825c64d89360d5266652c79c769"
+          }
+        },
+        {
+          "client_id": "431275444072-7euqfrigic9q4dnh95knn3reqqkub41u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDn7-id2SKHhW1pGfBp05_6ooZZraIU70Y"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "431275444072-7euqfrigic9q4dnh95knn3reqqkub41u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

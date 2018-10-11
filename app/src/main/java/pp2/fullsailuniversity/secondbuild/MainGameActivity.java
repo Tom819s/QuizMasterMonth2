@@ -11,6 +11,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -33,10 +35,14 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     public static List<QuizQuestion> quiz;
     public static AtomicInteger i, score;
     public static String urlToAPI;
+    public static int gameTime;
     private long millisToAnswer;
     private TextView question;
     private TextView timerText;
     private TextView scorecounter, questioncounter;
+    public static boolean hints;
+    private int numCorrect, numInRow;
+    private boolean previouscorrect;
     private Button next,
             exit,
             b1, b2, b3, b4;
@@ -54,6 +60,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         i = new AtomicInteger();
         score = new AtomicInteger(0);
 
+        Bundle bundle = getIntent().getExtras();
+        gameTime = (bundle.getInt("myKey")  * 1000) + 1000;
+        Log.d(TAG, "onCreate: gametime" + gameTime);
+
         ProgressBar pbar = findViewById(R.id.progressBar);
         b1 = findViewById(R.id.button1);
         b2 = findViewById(R.id.button2);
@@ -61,7 +71,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         b4 = findViewById(R.id.button4);
         questioncounter = findViewById(R.id.questionNumber);
         scorecounter = findViewById(R.id.score);
-        question = findViewById(R.id.textView);
+        question = findViewById(R.id.userEmail);
         next = findViewById(R.id.nextB);
         exit = findViewById(R.id.exitB);
         startbtn = findViewById(R.id.start_button);
@@ -182,21 +192,23 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             buttons.add(b4);
 
 
-            gameTimer = new CountDownTimer(21000, 1000) {
+            gameTimer = new CountDownTimer(gameTime, 1000) {
 
                 public void onTick(long millisUntilFinished) {
+
                     String count = Long.toString(millisUntilFinished / 1000);
-                    millisToAnswer = 21000 - millisUntilFinished;
-                    if (millisUntilFinished / 1000 > 10) {
+                    millisToAnswer = gameTime - millisUntilFinished;
+                    if (millisUntilFinished > (gameTime/2 + 1000)) {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
-                    } else if (millisUntilFinished / 1000 > 5) {
+                    } else if (millisUntilFinished > (gameTime/4 + 1000)) {
                         timerText.setTextColor(Color.rgb(255, 204, 0));
                     } else {
                         if (!tickingSound.isPlaying()) {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
+                            if (hints){
                             buttons.get(0).setEnabled(false);
-                            buttons.get(1).setEnabled(false);
+                            buttons.get(1).setEnabled(false);}
                         }
                             timerText.setTextColor(Color.rgb(204, 0, 0));
                         }
@@ -376,7 +388,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
                         correctSound.start();
-                        if (millisToAnswer < 6000)
+                        if (millisToAnswer < 2500){
+                            score.set(score.get() * 2 + 5);
+                            displayMedal4();
+                        }
+                        else if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
                         else if (millisToAnswer < 10000)
                             score.set(score.get() + 3);
@@ -386,14 +402,16 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//                    correctSound.start();
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
-                    } else {
+                        numInRow += 1;
+                        numCorrect +=1;
 
+                        if (numInRow == 3){
+                            displayMedal2();
+                            score.set(score.get() + 5);
+                            numInRow = 0;
+                        }
+                    } else {
+                        numInRow = 0;
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
@@ -457,7 +475,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         correctSound.start();
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 6000)
+                        if (millisToAnswer < 2500){
+                            score.set(score.get() * 2 + 5);
+                            displayMedal4();
+                        }
+                        else if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
                         else if (millisToAnswer < 10000)
                             score.set(score.get() + 3);
@@ -467,14 +489,17 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.GREEN);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
-                    } else {
+                        numInRow += 1;
+                        numCorrect +=1;
 
+                        if (numInRow == 3){
+                            displayMedal2();
+                            score.set(score.get() + 5);
+                            numInRow = 0;
+                        }
+
+                    } else {
+                        numInRow = 0;
                         b1.setBackgroundColor(Color.LTGRAY);
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
@@ -536,7 +561,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                     if (b3.getTag() == "true") {
                         correctSound.start();
-                        if (millisToAnswer < 6000)
+                        if (millisToAnswer < 2500){
+                            score.set(score.get() * 2 + 5);
+                            displayMedal4();
+                        }
+                        else if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
                         else if (millisToAnswer < 10000)
                             score.set(score.get() + 3);
@@ -549,13 +578,17 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.GREEN);
                         b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
+                        numInRow += 1;
+                        numCorrect +=1;
+
+                        if (numInRow == 3){
+                            displayMedal2();
+                            score.set(score.get() + 5);
+                            numInRow = 0;
+                        }
+
                     } else {
+                        numInRow = 0;
                         b1.setBackgroundColor(Color.LTGRAY);
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
@@ -617,7 +650,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         correctSound.start();
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 6000)
+                        if (millisToAnswer < 2500){
+                            score.set(score.get() * 2 + 5);
+                            displayMedal4();
+                        }
+                        else if (millisToAnswer < 6000)
                             score.set(score.get() + 5);
                         else if (millisToAnswer < 10000)
                             score.set(score.get() + 3);
@@ -627,13 +664,16 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.GREEN);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
+                        numInRow += 1;
+                        numCorrect +=1;
+
+                        if (numInRow == 3){
+                            displayMedal2();
+                            score.set(score.get() + 5);
+                            numInRow = 0;
+                        }
                     } else {
+                        numInRow = 0;
                         b1.setBackgroundColor(Color.LTGRAY);
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
@@ -691,5 +731,67 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
             builder.show();
         }
+    public void displayMedal1() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_1,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
 
     }
+    public void displayMedal2() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_2,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+    public void displayMedal3() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_3,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+    public void displayMedal4() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_4,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+    public void displayMedal5() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_5,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    }
+
+

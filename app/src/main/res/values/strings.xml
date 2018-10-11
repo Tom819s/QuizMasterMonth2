@@ -38,4 +38,6 @@
     <string name="exit">Main Menu</string>
     <string name="next">Next</string>
     <string name="Score">Score:</string>
+    <string name="leaderboard">Leaderboard</string>
+    <string name="achievements">Achievements</string>
 </resources>

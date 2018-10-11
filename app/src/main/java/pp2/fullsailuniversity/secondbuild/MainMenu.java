@@ -1,10 +1,14 @@
 package pp2.fullsailuniversity.secondbuild;
 
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,41 +20,48 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.io.IOException;
+import java.util.Set;
 
 public class MainMenu extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "Main Menu";
+    private static final int REQ_CODE = 101;
 
-    public Button quickStart;
-    public Button multi, lobby;
+
+
+
+    public Button multi, lobby, quickStart;
+    private static String[] userDataInformation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main_menu);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         quickStart = findViewById(R.id.quickstartButton);
         multi = findViewById(R.id.multiPB);
         lobby = findViewById(R.id.lobbyPB);
-        multi.setEnabled(false);
-        FloatingActionButton fab = findViewById(R.id.fab);
+        lobby.setEnabled(false);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Stay Tuned For Upcoming Content", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-            }
-        });
-
-        lobby.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent gotToGameSetup = new Intent(MainMenu.this, SetupMultiplayer.class);
-                startActivity(gotToGameSetup);
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 
@@ -65,14 +76,26 @@ public class MainMenu extends AppCompatActivity
                     MainGameActivity.urlToAPI = triviaURL.createURL();
                     finish();
                     Intent goToGame = new Intent(MainMenu.this, MainGameActivity.class);
+                    goToGame.putExtra("myKey", 20);
                     startActivity(goToGame);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                } catch (java.io.IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "quickStart IOException");
                 }
             }
         });
+
+        multi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    finish();
+                    Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
+                    startActivity(goToGame);
+                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
+        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -83,6 +106,7 @@ public class MainMenu extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
+
 
     @Override
     public void onBackPressed() {
@@ -95,11 +119,48 @@ public class MainMenu extends AppCompatActivity
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
+    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        //Setting user name and email values
+        TextView userName = findViewById(R.id.UserName);
+        TextView userEmail = findViewById(R.id.userEmail);
+
+        //getting user info
+        String[] userData = getIntent().getStringArrayExtra("myKey");
+        if (userData != null)
+        {
+            userDataInformation = new String[3];
+            userDataInformation[0] = userData[0];
+            userDataInformation[1] = userData[1];
+            userDataInformation[2] = userData[2];
+        Log.d(TAG, "onCreate: userData");
+        Log.d(TAG, "onCreate: userName = " + userData[0]);
+        Log.d(TAG, "onCreate: userEmail = " + userData[1]);
+        ImageView userPic = findViewById(R.id.userPhoto);
+
+        userName.setText(userData[0]);
+        userEmail.setText(userData[1]);
+
+            if (!userData[2].equals("DEFAULT IMAGE"))
+            Glide.with(this).load(userData[2]).into(userPic);
+            else
+                userPic.setImageResource(R.drawable.defaultuserimage);
+
+        }
+        else{
+            userName.setText(userDataInformation[0]);
+            userEmail.setText(userDataInformation[1]);
+            ImageView userPic = findViewById(R.id.userPhoto);
+            if (!userDataInformation[2].equals("DEFAULT IMAGE"))
+                Glide.with(this).load(userDataInformation[2]).into(userPic);
+            else
+                userPic.setImageResource(R.drawable.defaultuserimage);
+
+        }
+
+        return super.onCreatePanelMenu(featureId, menu);
     }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -116,28 +177,26 @@ public class MainMenu extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.gameAchievements) {
 
-        } else if (id == R.id.nav_slideshow) {
+            // Handle achievement action
+
+        } else if (id == R.id.leaderBoard) {
 
         } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -148,4 +207,11 @@ public class MainMenu extends AppCompatActivity
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
     }
+
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
 }

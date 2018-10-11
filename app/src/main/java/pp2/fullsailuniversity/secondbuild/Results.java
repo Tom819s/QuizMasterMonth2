@@ -77,6 +77,7 @@ public class Results extends AppCompatActivity {
         retry.setOnClickListener((View) ->
         {
             Intent toMainGame = new Intent(Results.this, MainGameActivity.class);
+            toMainGame.putExtra("myKey", 20);
             finish();
             startActivity(toMainGame);
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);

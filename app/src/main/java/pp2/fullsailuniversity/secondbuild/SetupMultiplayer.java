@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
@@ -12,6 +13,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -31,10 +34,12 @@ import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate.Status;
 import com.google.android.gms.nearby.connection.Strategy;
 
+import java.util.Random;
+
 /** Activity controlling the Rock Paper Scissors game */
 public class SetupMultiplayer extends AppCompatActivity {
 
-    private static final String TAG = "RockPaperScissors";
+    private static final String TAG = "SetupMultiplayer";
 
     private static final String[] REQUIRED_PERMISSIONS =
             new String[] {
@@ -61,7 +66,7 @@ public class SetupMultiplayer extends AppCompatActivity {
     private String opponentName;
     private int opponentScore;
 
-    private Button findOpponentButton, disconnectButton;
+    private Button findOpponentButton, disconnectButton, testMedal;
     private TextView opponentText;
     private TextView statusText;
     private TextView scoreText;
@@ -136,13 +141,22 @@ public class SetupMultiplayer extends AppCompatActivity {
 
         findOpponentButton = findViewById(R.id.findOpponentButton);
         disconnectButton = findViewById(R.id.disconnect);
-
+        testMedal = findViewById(R.id.TestMedalButton);
         statusText = findViewById(R.id.statusText);
 
 
         connectionsClient = Nearby.getConnectionsClient(this);
 
         resetGame();
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        Intent toMainMenu = new Intent(this, MainMenu.class);
+        finish();
+        startActivity(toMainMenu);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
     @Override
@@ -226,6 +240,36 @@ public class SetupMultiplayer extends AppCompatActivity {
         connectionsClient.startDiscovery(
                 getPackageName(), endpointDiscoveryCallback,
                 new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
+    }
+
+    public void randomMedal(View view){
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        Random rand = new Random();
+
+        int result = rand.nextInt()%5;
+
+        if (result == 0){
+        view = toastInflater.inflate(R.layout.medal_1,
+                findViewById(R.id.relativeLayout1));
+        }
+        else if (result == 1){
+            view = toastInflater.inflate(R.layout.medal_2,
+                    findViewById(R.id.relativeLayout1));
+        }else if (result == 2){
+            view = toastInflater.inflate(R.layout.medal_3,
+                    findViewById(R.id.relativeLayout1));
+        }else if (result == 3){
+            view = toastInflater.inflate(R.layout.medal_4,
+                    findViewById(R.id.relativeLayout1));
+        }else{
+            view = toastInflater.inflate(R.layout.medal_5,
+                    findViewById(R.id.relativeLayout1));
+        }
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
     }
 
     /** Broadcasts our presence using Nearby Connections so other players can find us. */
