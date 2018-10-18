@@ -312,9 +312,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {
 
                 startActivity(goToMainMenu);
-                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
-                //finish();
+                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

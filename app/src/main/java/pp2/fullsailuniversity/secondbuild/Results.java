@@ -29,30 +29,30 @@ public class Results extends AppCompatActivity {
 
 
         float points = ((float)score / (float)totalquestions);
-        criteriaText.setText("Points Needed:\nA: " + (int)(totalquestions*3 + 1) + "\nB: " + (int)(totalquestions*2.5 + 1)+
-                "\nC: " + (int)(totalquestions*1.5 + 1) + "\nD: " + (int)(totalquestions*1 + 1));
-        if (points > 3.0f)
+        criteriaText.setText("Points Needed:\nA: " + (int)(totalquestions*7 + 1) + "\nB: " + (int)(totalquestions*6 + 1)+
+                "\nC: " + (int)(totalquestions*4 + 1) + "\nD: " + (int)(totalquestions*2 + 1));
+        if (points > 7.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             gradeImage.setImageResource(R.drawable.grade_a);
             resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
         }
-        else if (points > 2.5f)
+        else if (points > 6.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             gradeImage.setImageResource(R.drawable.grade_b);
             resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
         }
-        else if (points > 1.5f)
+        else if (points > 4.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
             gradeImage.setImageResource(R.drawable.grade_c);
             resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
         }
-        else if (points > 1.0f)
+        else if (points > 2.0f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();
