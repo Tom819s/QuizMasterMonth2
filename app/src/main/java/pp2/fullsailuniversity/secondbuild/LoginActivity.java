@@ -269,8 +269,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-
-
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
@@ -307,7 +305,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             Intent goToMainMenu = new Intent(LoginActivity.this, MainMenu.class);
-
+            String[] userInfo = new String[3];
+            userInfo[0] = "Offline User";
+            userInfo[1] = "test@example.com";
+            userInfo[2] = "DEFAULT IMAGE";
+            goToMainMenu.putExtra("myKey", userInfo);
             mAuthTask = null;
             showProgress(false);
 

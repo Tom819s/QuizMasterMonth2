@@ -52,7 +52,7 @@ public class Results extends AppCompatActivity {
             gradeImage.setImageResource(R.drawable.grade_c);
             resultsText.setText("You passed the quiz with " + score + " points from " + totalquestions + " questions");
         }
-        else if (points > 2.0f)
+        else if (points > 1.6f)
         {
             MediaPlayer cheerSound = MediaPlayer.create(this, R.raw.cheersound);
             cheerSound.start();

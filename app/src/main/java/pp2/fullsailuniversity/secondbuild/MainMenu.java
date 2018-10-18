@@ -2,6 +2,7 @@ package pp2.fullsailuniversity.secondbuild;
 
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -43,12 +44,16 @@ public class MainMenu extends AppCompatActivity
 
     public Button multi, lobby, quickStart;
     private static String[] userDataInformation;
+    private MediaPlayer menuMusic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
+        menuMusic = MediaPlayer.create(MainMenu.this, R.raw.menuloop);
+        menuMusic.setLooping(true);
+        menuMusic.start();
         setContentView(R.layout.activity_main_menu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -75,6 +80,8 @@ public class MainMenu extends AppCompatActivity
                 try {
                     MainGameActivity.urlToAPI = triviaURL.createURL();
                     finish();
+                    if (menuMusic.isPlaying())
+                        menuMusic.stop();
                     Intent goToGame = new Intent(MainMenu.this, MainGameActivity.class);
                     goToGame.putExtra("myKey", 20);
                     startActivity(goToGame);
@@ -89,6 +96,9 @@ public class MainMenu extends AppCompatActivity
         multi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (menuMusic.isPlaying())
+                    menuMusic.stop();
                     finish();
                     Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
                     startActivity(goToGame);
@@ -202,12 +212,29 @@ public class MainMenu extends AppCompatActivity
 
     public void SoloButtonH(View view) {
 
+        if (menuMusic.isPlaying())
+            menuMusic.stop();
         Intent gotToGameSetup = new Intent(this, GameSetup.class);
         startActivity(gotToGameSetup);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (menuMusic.isPlaying())
+            menuMusic.stop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!menuMusic.isPlaying()){
+        menuMusic = MediaPlayer.create(MainMenu.this, R.raw.menuloop);
+        menuMusic.setLooping(true);
+        menuMusic.start();}
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
