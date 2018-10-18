@@ -25,8 +25,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
-import java.util.Objects;
-
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -49,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
 
-    private void singOut() {
+    private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             Log.d(TAG, "onStart: -------------" + check);
             if (check == "confirmed"){
 
-                singOut();
+                signOut();
             }
         }
     }
