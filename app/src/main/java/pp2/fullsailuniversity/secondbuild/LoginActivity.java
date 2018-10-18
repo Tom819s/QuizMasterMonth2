@@ -305,16 +305,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected void onPostExecute(final Boolean success) {
             Intent goToMainMenu = new Intent(LoginActivity.this, MainMenu.class);
-
+            String[] userInfo = new String[3];
+            userInfo[0] = "Offline User";
+            userInfo[1] = "test@example.com";
+            userInfo[2] = "DEFAULT IMAGE";
+            goToMainMenu.putExtra("myKey", userInfo);
             mAuthTask = null;
             showProgress(false);
 
             if (success) {
 
                 startActivity(goToMainMenu);
-                //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
-                //finish();
+                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

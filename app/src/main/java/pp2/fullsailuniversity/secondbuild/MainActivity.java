@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+import android.view.View;
 
 
 import com.google.android.gms.auth.api.Auth;
@@ -24,6 +25,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+
+import java.util.Objects;
 
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
@@ -42,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
 
-
     }
 
 
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -67,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         setContentView(R.layout.activity_main);
         //TODO customize sig in button
-
 
         SignInButton signIn = findViewById(R.id.googleSignIn);
         signIn.setSize(SignInButton.SIZE_WIDE);
@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void signInResultHandler(GoogleSignInResult result) {
 
-
         Log.d(TAG, "signInResultHandler: SIGNIN RESULT CALLED");
         if (result.isSuccess()) {
 
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
             goToMainMenu.putExtra("myKey", userData);
-             flag = false;
+
             startActivity(goToMainMenu);
         }
     }
@@ -218,6 +217,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
 
+
+
+    }
+
+    public void loginHandlerB(View view) {
+        Intent intent = new Intent(this, LoginActivity.class);
+
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
 

@@ -2,6 +2,7 @@ package pp2.fullsailuniversity.secondbuild;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ public class GameSetup extends AppCompatActivity {
     private RadioGroup categoriesRadio, difficultiesRadio;
     private NumberPicker numpicker, timepicker;
     private Switch hintsOn;
+    private MediaPlayer menuMusic;
 
     private static final String TAG = "GameSetup";
 
@@ -30,7 +32,7 @@ public class GameSetup extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_setup);
-
+        menuMusic = MediaPlayer.create(GameSetup.this, R.raw.menuloop);
         categoriesRadio = findViewById(R.id.radioGroupCategory);
         difficultiesRadio = findViewById(R.id.radioGroupDifficulty);
         numpicker = findViewById(R.id.numQuestionPicker);
@@ -76,6 +78,21 @@ public class GameSetup extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (menuMusic.isPlaying())
+            menuMusic.stop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!menuMusic.isPlaying()){
+            menuMusic = MediaPlayer.create(GameSetup.this, R.raw.menuloop);
+            menuMusic.setLooping(true);
+            menuMusic.start();}
+    }
     public void playButtonHandler(View view) {
         try {
             int catID = categoriesRadio.getCheckedRadioButtonId();
