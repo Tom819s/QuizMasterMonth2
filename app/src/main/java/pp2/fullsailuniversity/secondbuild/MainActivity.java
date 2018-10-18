@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.google.android.gms.auth.api.Auth;
@@ -21,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
 import java.util.Objects;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private GoogleApiClient mGoogleApiClient;
     public GoogleSignInAccount accToSend;
+    boolean flag = false;
 
     //Sign in Flow Functions
 
@@ -41,15 +44,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
 
+
     }
 
-    private void userSignOut() {
-        //TODO Sign the user out and update UI
+
+
+    private void singOut() {
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        Toast.makeText(MainActivity.this, "You are signed out", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
     }
 
-    private void disconnect() {
-        //TODO disconnect current account completely and update UI
-    }
 
 
     @Override
@@ -59,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         setContentView(R.layout.activity_main);
         //TODO customize sig in button
+
 
         SignInButton signIn = findViewById(R.id.googleSignIn);
         signIn.setSize(SignInButton.SIZE_WIDE);
@@ -97,16 +108,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
+        String check = getIntent().getStringExtra("thekey");
+        Log.d(TAG, "onStart: -------------" + check);
+
+        if (requestCode == RC_SIGN_IN && check != "confirmed") {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             signInResultHandler(result);
 
             updateUI(result);
         }
+        else
+        {
+            Log.d(TAG, "onStart: -------------" + check);
+            if (check == "confirmed"){
+
+                singOut();
+            }
+        }
     }
 
 
     private void signInResultHandler(GoogleSignInResult result) {
+
 
         Log.d(TAG, "signInResultHandler: SIGNIN RESULT CALLED");
         if (result.isSuccess()) {
@@ -140,16 +163,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             userData[0] = accToSend.getDisplayName();
             userData[1] = accToSend.getEmail();
             if (accToSend.getPhotoUrl() != null)
-            userData[2] = accToSend.getPhotoUrl().toString();
-            else
-                {
+                userData[2] = accToSend.getPhotoUrl().toString();
+            else {
                 userData[2] = "DEFAULT IMAGE";
                 Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
             }
 
             Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
             goToMainMenu.putExtra("myKey", userData);
-
+             flag = false;
             startActivity(goToMainMenu);
         }
     }
@@ -157,35 +179,46 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onStart() {
         super.onStart();
+        String check = getIntent().getStringExtra("thekey");
+        Log.d(TAG, "onStart: -------------" + check);
 
-        Intent goToMainMenu = new Intent(this, MainMenu.class);
-
-
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        // Array data as follows
-        //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
-        String[] userData = new String[3];
-        if (account != null) {
-
-            userData[0] = account.getDisplayName();
-            userData[1] = account.getEmail();
-            if (account.getPhotoUrl() != null)
-                userData[2] = account.getPhotoUrl().toString();
-            else
-            {
-                userData[2] = "DEFAULT IMAGE";
-                Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
-            }
-
-            Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
-            goToMainMenu.putExtra("myKey", userData);
-
-            startActivity(goToMainMenu);
+        if(check != null)
+        {
+            flag = true;
         }
+
+       if(check == null && flag == false) {
+           Intent goToMainMenu = new Intent(this, MainMenu.class);
+
+
+           GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+           // Array data as follows
+           //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
+           String[] userData = new String[3];
+
+
+           if (account != null) {
+
+               userData[0] = account.getDisplayName();
+               userData[1] = account.getEmail();
+               if (account.getPhotoUrl() != null)
+                   userData[2] = account.getPhotoUrl().toString();
+               else {
+                   userData[2] = "DEFAULT IMAGE";
+                   Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
+               }
+
+               Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
+               goToMainMenu.putExtra("myKey", userData);
+
+               startActivity(goToMainMenu);
+           }
+       }
+       else {
+           Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show();
+       }
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
-
-
 
     }
 

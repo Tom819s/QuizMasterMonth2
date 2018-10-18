@@ -8,22 +8,30 @@
 
 
         <item
-            android:id="@+id/gameAchievements"
+            android:id="@+id/gameBadges"
             android:icon="@drawable/games_achievements"
-            android:title="@string/achievements" />
+            android:title="@string/badges" />
         <item
             android:id="@+id/leaderBoard"
             android:icon="@drawable/games_leaderboards"
             android:title="@string/leaderboard" />
     </group>
 
-    <item android:title="Settings">
+    <item android:title="Settings"
+        tools:ignore="HardcodedText">
         <menu>
             <item
                 android:id="@+id/nav_manage"
                 android:icon="@drawable/ic_menu_manage"
                 android:title="Tools" />
+            <item
+                android:id="@+id/sing_out"
+                android:icon="@drawable/log_out"
+                android:title="Log Out" />
         </menu>
+
+
+
     </item>
 
 </menu>

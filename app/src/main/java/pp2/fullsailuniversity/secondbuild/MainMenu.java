@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,6 +22,8 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +33,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.IOException;
+import java.sql.RowId;
 import java.util.Set;
 
 public class MainMenu extends AppCompatActivity
@@ -37,8 +41,6 @@ public class MainMenu extends AppCompatActivity
 
     private static final String TAG = "Main Menu";
     private static final int REQ_CODE = 101;
-
-
 
 
     public Button multi, lobby, quickStart;
@@ -89,10 +91,10 @@ public class MainMenu extends AppCompatActivity
         multi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    finish();
-                    Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
-                    startActivity(goToGame);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
+                startActivity(goToGame);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
 
@@ -105,6 +107,19 @@ public class MainMenu extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        Intent intent = getIntent();
+        String[] userData = intent.getStringArrayExtra("myKey");
+
+
+        int duration = Toast.LENGTH_LONG;
+        Toast toast = Toast.makeText(this, "Logged in as : " + userData[0], duration);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+
+        toast.show();
+
+
     }
 
 
@@ -113,9 +128,8 @@ public class MainMenu extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
+
     }
 
     @Override
@@ -126,27 +140,25 @@ public class MainMenu extends AppCompatActivity
 
         //getting user info
         String[] userData = getIntent().getStringArrayExtra("myKey");
-        if (userData != null)
-        {
+        if (userData != null) {
             userDataInformation = new String[3];
             userDataInformation[0] = userData[0];
             userDataInformation[1] = userData[1];
             userDataInformation[2] = userData[2];
-        Log.d(TAG, "onCreate: userData");
-        Log.d(TAG, "onCreate: userName = " + userData[0]);
-        Log.d(TAG, "onCreate: userEmail = " + userData[1]);
-        ImageView userPic = findViewById(R.id.userPhoto);
+            Log.d(TAG, "onCreate: userData");
+            Log.d(TAG, "onCreate: userName = " + userData[0]);
+            Log.d(TAG, "onCreate: userEmail = " + userData[1]);
+            ImageView userPic = findViewById(R.id.userPhoto);
 
-        userName.setText(userData[0]);
-        userEmail.setText(userData[1]);
+            userName.setText(userData[0]);
+            userEmail.setText(userData[1]);
 
             if (!userData[2].equals("DEFAULT IMAGE"))
-            Glide.with(this).load(userData[2]).into(userPic);
+                Glide.with(this).load(userData[2]).into(userPic);
             else
                 userPic.setImageResource(R.drawable.defaultuserimage);
 
-        }
-        else{
+        } else {
             userName.setText(userDataInformation[0]);
             userEmail.setText(userDataInformation[1]);
             ImageView userPic = findViewById(R.id.userPhoto);
@@ -159,7 +171,6 @@ public class MainMenu extends AppCompatActivity
 
         return super.onCreatePanelMenu(featureId, menu);
     }
-
 
 
     @Override
@@ -184,14 +195,24 @@ public class MainMenu extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.gameAchievements) {
+
+        if (id == R.id.gameBadges) {
 
             // Handle achievement action
+            //adding a fragment on runtime
+
 
         } else if (id == R.id.leaderBoard) {
 
+
         } else if (id == R.id.nav_manage) {
 
+        } else if (id == R.id.sing_out) {
+
+            Intent intent = new Intent(this, MainActivity.class);
+            String signout = "confirmed";
+            intent.putExtra("thekey", signout);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
