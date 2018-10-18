@@ -153,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             startActivity(goToMainMenu);
         }
     }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -161,27 +160,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent goToMainMenu = new Intent(this, MainMenu.class);
 
 
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        // Array data as follows
-        //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
-        String[] userData = new String[3];
-        if (account != null) {
-
-            userData[0] = account.getDisplayName();
-            userData[1] = account.getEmail();
-            if (account.getPhotoUrl() != null)
-                userData[2] = account.getPhotoUrl().toString();
-            else
-            {
-                userData[2] = "DEFAULT IMAGE";
-                Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
-            }
-
-            Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
-            goToMainMenu.putExtra("myKey", userData);
-
-            startActivity(goToMainMenu);
-        }
+//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+//        // Array data as follows
+//        //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
+//        String[] userData = new String[3];
+//        if (account != null) {
+//
+//            userData[0] = account.getDisplayName();
+//            userData[1] = account.getEmail();
+//            if (account.getPhotoUrl() != null)
+//                userData[2] = account.getPhotoUrl().toString();
+//            else
+//            {
+//                userData[2] = "DEFAULT IMAGE";
+//                Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
+//            }
+//
+//            Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
+//            goToMainMenu.putExtra("myKey", userData);
+//
+//            startActivity(goToMainMenu);
+//        }
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
 
