@@ -36,12 +36,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     public static AtomicInteger i, score;
     public static String urlToAPI;
     public static int gameTime;
+
     private long millisToAnswer, timeLeft, moveonLeft;
     private TextView question;
     private TextView timerText;
     private TextView scorecounter, questioncounter;
     public static boolean hints;
-    private int numCorrect, numInRow;
+    private int numCorrect, numInRow, numQuestions;
     private boolean previouscorrect;
     private Button next,
             exit,
@@ -169,7 +170,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
     public void GameLoop(int index) {
 
-        questioncounter.setText("Question: " + (index+1));
         timeLeft = 0;
         moveonLeft = 0;
         if (tickingSound.isPlaying()) {
@@ -193,7 +193,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             buttons.add(b3);
             buttons.add(b4);
 
-
+            numQuestions = quiz.size();
+            questioncounter.setText("Question: " + (index+1) + " / " + numQuestions);
             gameTimer = new CountDownTimer(gameTime, 1000) {
 
                 public void onTick(long millisUntilFinished) {
