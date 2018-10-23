@@ -122,11 +122,13 @@ public class MainMenu extends AppCompatActivity
         String[] userData = intent.getStringArrayExtra("myKey");
 
 
-        int duration = Toast.LENGTH_LONG;
-        Toast toast = Toast.makeText(this, "Logged in as : " + userData[0], duration);
-        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        if (userData != null) {
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(this, "Logged in as : " + userData[0], duration);
+            toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
 
-        toast.show();
+            toast.show();
+        }
 
 
     }
@@ -206,7 +208,7 @@ public class MainMenu extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.gameAchievements) {
+        if (id == R.id.gameBadges) {
 
             // Handle achievement action
 
