@@ -72,7 +72,7 @@ public class SetupMultiplayer extends AppCompatActivity {
     private final String codeName = "PlaceholderName";
 
     private String opponentEndpointId;
-    private String opponentName;
+    private String opponentName, userName;
     private int opponentScore;
 
     private Button findOpponentButton, disconnectButton, testMedal, sendChat;
@@ -148,7 +148,7 @@ public class SetupMultiplayer extends AppCompatActivity {
         super.onCreate(bundle);
         setContentView(R.layout.multiplayer_join_activity);
 
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         findOpponentButton = findViewById(R.id.findOpponentButton);
         disconnectButton = findViewById(R.id.disconnect);
         testMedal = findViewById(R.id.TestMedalButton);
@@ -156,6 +156,8 @@ public class SetupMultiplayer extends AppCompatActivity {
         chatText = findViewById(R.id.chatTextBox);
         chatInput = findViewById(R.id.textEnter);
         sendChat = findViewById(R.id.sendChat);
+        userName = "Scholar" + (int)(Math.random() * 1000);
+
 
         connectionsClient = Nearby.getConnectionsClient(this);
 
@@ -333,7 +335,7 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Updates the running score ticker. */
     public void sendChat(View view) {
-        String input = chatInput.getText().toString();
+        String input = userName + chatInput.getText().toString();
         Payload chatPayload = Payload.fromBytes(input.getBytes());
         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
         chatInput.setText("");
