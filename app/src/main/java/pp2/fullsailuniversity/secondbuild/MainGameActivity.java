@@ -46,9 +46,9 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private boolean previouscorrect;
     private Button next,
             exit,
-            b1, b2, b3, b4;
-    private ImageButton startbtn;
+    b1, b2, b3, b4;
     private CountDownTimer gameTimer, timesup;
+    private ImageButton startbtn;
     private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
 
 
@@ -147,6 +147,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     @Override
     public void onBackPressed() {
 
+        if (gameTimer != null)
+            gameTimer.cancel();
+        if (timesup != null)
+            timesup.cancel();
         leaveGame();
     }
 
@@ -180,6 +184,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             alarm.stop();
         }
 
+        if (timesup != null)
+        timesup.cancel();
         gameTimer.cancel();
 
         if (quiz != null && index < quiz.size()) {
@@ -345,6 +351,11 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                     } else {
                         i.set(quiz.size());
                         Intent results = new Intent(MainGameActivity.this, Results.class);
+                        int[] gameResults = new int[3];
+                        gameResults[0] = i.get();
+                        gameResults[1] = score.get();
+                        gameResults[2] = (gameTime - 1000) / 1000;
+                        results.putExtra("gameResults", gameResults);
                         finish();
                         startActivity(results);
                         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -393,7 +404,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         timerText.setTextColor(Color.GREEN);
                         correctSound.start();
                         if (millisToAnswer < 2500){
-                            score.set(score.get() * 2 + 5);
+                            score.set(score.get() + 10);
                             displayMedal4();
                         }
                         else if (millisToAnswer < 6000)
@@ -480,7 +491,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
                         if (millisToAnswer < 2500){
-                            score.set(score.get() * 2 + 5);
+                            score.set(score.get()+ 10);
                             displayMedal4();
                         }
                         else if (millisToAnswer < 6000)
@@ -566,7 +577,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                     if (b3.getTag() == "true") {
                         correctSound.start();
                         if (millisToAnswer < 2500){
-                            score.set(score.get() * 2 + 5);
+                            score.set(score.get() + 10);
                             displayMedal4();
                         }
                         else if (millisToAnswer < 6000)
@@ -655,7 +666,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         timerText.setText("Correct!");
                         timerText.setTextColor(Color.GREEN);
                         if (millisToAnswer < 2500){
-                            score.set(score.get() * 2 + 5);
+                            score.set(score.get() + 10);
                             displayMedal4();
                         }
                         else if (millisToAnswer < 6000)

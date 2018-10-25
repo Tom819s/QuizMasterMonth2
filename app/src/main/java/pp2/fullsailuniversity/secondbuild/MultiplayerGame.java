@@ -326,7 +326,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             GameLoop(i.get()); //call game loop with new index value
                         } else {
                             i.set(quiz.size());
+                            int[] gameResults = new int[2];
+                            gameResults[0] = i.get();
+                            gameResults[1] = score.get();
                             Intent results = new Intent(MultiplayerGame.this, Results.class);
+                            results.putExtra("myKey", gameResults);
                             finish();
                             startActivity(results);
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -335,8 +339,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     }
             );
 
-
-            //exit App
 
             //next button functionality
             b1.setOnClickListener((view)->

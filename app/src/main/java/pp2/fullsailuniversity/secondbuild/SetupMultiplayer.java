@@ -33,13 +33,15 @@ import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate.Status;
 import com.google.android.gms.nearby.connection.Strategy;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Random;
 
 /** Activity controlling the Rock Paper Scissors game */
 public class SetupMultiplayer extends AppCompatActivity {
 
-    private static final String TAG = "SetupMultiplayer";
+    private static final String TAG = "SetupMultiplayer", SERVICE_ID = "TRIVIAMASTERYAPP";
 
     private static final String[] REQUIRED_PERMISSIONS =
             new String[] {
@@ -225,6 +227,7 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Sends a {GameChoice} to the other player. */
     public void makeMove(View view) {
+
 //        if (view.getId() == R.id.rock) {
 //            sendGameChoice(GameChoice.ROCK);
 //        } else if (view.getId() == R.id.paper) {
@@ -274,10 +277,24 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Broadcasts our presence using Nearby Connections so other players can find us. */
     private void startAdvertising() {
-        // Note: Advertising may fail. To keep this demo simple, we don't handle failures.
-        connectionsClient.startAdvertising(
-                codeName, getPackageName(), connectionLifecycleCallback,
-                new AdvertisingOptions.Builder().setStrategy(STRATEGY).build());
+//        Nearby.getConnectionsClient(getApplicationContext()).startAdvertising(
+////                getUserNickname(),
+////                SERVICE_ID,
+////                mConnectionLifecycleCallback,
+////            new AdvertisingOptions.Builder().setStrategy(STRATEGY))
+////                .addOnSuccessListener(
+////                        new OnSuccessListener<Void>() {
+////                            @Override
+////                            public void onSuccess(Void unusedResult) {// We're advertising!
+////                            }
+////                        })
+////                .addOnFailureListener(
+////                        new OnFailureListener() {
+////                            @Override
+////                            public void onFailure(@NonNull Exception e) {
+////                                // We were unable to start advertising.
+////                            }
+////                        });
     }
 
     /** Wipes all game state and updates the UI accordingly. */
