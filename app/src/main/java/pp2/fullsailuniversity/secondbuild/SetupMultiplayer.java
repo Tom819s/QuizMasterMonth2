@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
@@ -15,6 +16,11 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -87,7 +93,8 @@ public class SetupMultiplayer extends AppCompatActivity {
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(String endpointId, Payload payload) {
-                    chatText.append(new String(payload.asBytes()));
+                    String receivedString = new String(payload.asBytes());
+                    chatText.append(Html.fromHtml(receivedString));
                     chatText.append("\n");
                 }
 
@@ -154,9 +161,17 @@ public class SetupMultiplayer extends AppCompatActivity {
         testMedal = findViewById(R.id.TestMedalButton);
         statusText = findViewById(R.id.statusText);
         chatText = findViewById(R.id.chatTextBox);
+        chatText.setMovementMethod(new ScrollingMovementMethod());
         chatInput = findViewById(R.id.textEnter);
         sendChat = findViewById(R.id.sendChat);
-        userName = "Scholar" + (int)(Math.random() * 1000);
+        Random random = new Random();
+
+        // create a big random number - maximum is ffffff (hex) = 16777215 (dez)
+        int nextInt = random.nextInt(0xffffff + 1);
+
+        // format it as hexadecimal string (with hashtag and leading zeros)
+        String colorCode = String.format("#%06x", nextInt);
+        userName = "<font color='" + colorCode + "'>" + "Scholar" + (int)(Math.random() * 1000) + ":</font>";
 
 
         connectionsClient = Nearby.getConnectionsClient(this);
@@ -239,7 +254,7 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Disconnects from the opponent and reset the UI. */
     public void disconnect(View view) {
-        connectionsClient.disconnectFromEndpoint(opponentEndpointId);
+        resetGame();
         setStatusText("DISCONNECTED FROM CONNECTION");
     }
 
@@ -335,10 +350,12 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Updates the running score ticker. */
     public void sendChat(View view) {
-        String input = userName + chatInput.getText().toString();
-        Payload chatPayload = Payload.fromBytes(input.getBytes());
+        String input =  '\t' + chatInput.getText().toString();
+        String tosend = userName + input;
+        Payload chatPayload = Payload.fromBytes(tosend.getBytes());
         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
         chatInput.setText("");
+        chatText.append(Html.fromHtml(userName));
         chatText.append(input + '\n');
     
     

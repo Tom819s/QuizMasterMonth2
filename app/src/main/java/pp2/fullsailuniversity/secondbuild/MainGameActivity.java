@@ -43,13 +43,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private TextView scorecounter, questioncounter;
     public static boolean hints;
     private int numCorrect, numInRow, numQuestions;
-    private boolean previouscorrect;
+    private boolean previouscorrect, hasStopped;
     private Button next,
             exit,
     b1, b2, b3, b4;
     private CountDownTimer gameTimer, timesup;
     private ImageButton startbtn;
-    private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
+    private MediaPlayer correctSound, wrongSound, tickingSound, alarm, loopingElectro;
 
 
 
@@ -58,7 +58,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         Log.d(TAG, "onCreate: starts");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_game);
-
+        hasStopped = false;
         i = new AtomicInteger();
         score = new AtomicInteger(0);
 
@@ -81,10 +81,12 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
 
         correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
-        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.wrong);
+        loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
+        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
         tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
-
+        loopingElectro.setLooping(true);
+        loopingElectro.start();
         scorecounter.setText("Score: 0");
         timerText.setText(" ");
         question.setText("");
@@ -137,7 +139,10 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
         exit.setOnClickListener((view) ->
         {
+            if (loopingElectro.isPlaying())
+                loopingElectro.stop();
             leaveGame();
+
         });
 
         Log.d(TAG, "onCreate: ends");
@@ -147,6 +152,8 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     @Override
     public void onBackPressed() {
 
+        if (loopingElectro.isPlaying())
+            loopingElectro.stop();
         if (gameTimer != null)
             gameTimer.cancel();
         if (timesup != null)
@@ -155,10 +162,98 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        hasStopped = true;
+        if (loopingElectro.isPlaying())
+            loopingElectro.stop();
+        if(tickingSound.isPlaying())
+            tickingSound.stop();
+        if (alarm.isPlaying())
+            alarm.stop();
+        if (gameTimer != null)
+            gameTimer.cancel();
+        if (timesup!= null)
+            timesup.cancel();
+    }
+
+    @Override
     protected void onResume() {
         Log.d(TAG, "onResume starts");
         super.onResume();
-        Log.d(TAG, "onResume ends");
+
+        if (hasStopped){
+            if (!loopingElectro.isPlaying()){
+            loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
+            loopingElectro.setLooping(true);
+            loopingElectro.start();
+            }
+        tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
+        alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
+        correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
+        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.wrong);
+
+        gameTimer = new CountDownTimer(timeLeft, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+
+                String count = Long.toString(millisUntilFinished / 1000);
+                millisToAnswer = gameTime - millisUntilFinished;
+                timeLeft = millisUntilFinished;
+                if (millisUntilFinished > (gameTime/2 + 1000)) {
+                    timerText.setTextColor(Color.rgb(0, 204, 0));
+                } else if (millisUntilFinished > (gameTime/4 + 1000)) {
+                    timerText.setTextColor(Color.rgb(255, 204, 0));
+                } else {
+                    if (!tickingSound.isPlaying()) {
+                        tickingSound.setVolume(5.0f, 5.0f);
+                        tickingSound.start();
+                    }
+                    timerText.setTextColor(Color.rgb(204, 0, 0));
+                }
+                timerText.setText(count);
+            }
+
+            public void onFinish () {
+                tickingSound.stop();
+                alarm.setVolume(5.0f, 5.0f);
+                alarm.start();
+                timerText.setText("Time's Up!");
+                b1.setEnabled(false);
+                b2.setEnabled(false);
+                b3.setEnabled(false);
+                b4.setEnabled(false);
+                next.setEnabled(true);
+
+                if (b1.getTag() == "true")
+                    b1.setBackgroundColor(Color.GREEN);
+                else if (b2.getTag() == "true")
+                    b2.setBackgroundColor(Color.GREEN);
+                else if (b3.getTag() == "true")
+                    b3.setBackgroundColor(Color.GREEN);
+                else if (b4.getTag() == "true")
+                    b4.setBackgroundColor(Color.GREEN);
+
+                scorecounter.setText("Score: " + score.toString());
+
+                timesup = new CountDownTimer(moveonLeft, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        moveonLeft = millisUntilFinished;
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        next.callOnClick();
+                    }
+                }.start();
+
+            }
+
+        }.start();
+        }
+                moveonLeft = 5000;
+                Log.d(TAG, "onResume ends");
     }
 
     @Override
@@ -431,6 +526,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
 
+                        wrongSound.reset();
                         wrongSound.start();
                         timerText.setText("Wrong!");
                         timerText.setTextColor(Color.rgb(255,0,0));
@@ -519,6 +615,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
+                        wrongSound.reset();
                         wrongSound.start();
                         timerText.setText("Wrong!");
                         timerText.setTextColor(Color.rgb(255,0,0));
@@ -608,6 +705,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         b2.setBackgroundColor(Color.LTGRAY);
                         b3.setBackgroundColor(Color.LTGRAY);
                         b4.setBackgroundColor(Color.LTGRAY);
+                        wrongSound.reset();
                         wrongSound.start();
                         if (b1.getTag() == "true")
                             b1.setBackgroundColor(Color.GREEN);

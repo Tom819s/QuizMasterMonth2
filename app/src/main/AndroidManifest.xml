@@ -48,6 +48,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".SetupMultiplayer"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait" />
         <activity
             android:name=".Results"
