@@ -40,6 +40,8 @@ import com.google.android.gms.nearby.connection.Strategy;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.w3c.dom.Text;
+
 import java.util.Random;
 
 /** Activity controlling the Rock Paper Scissors game */
@@ -76,7 +78,7 @@ public class SetupMultiplayer extends AppCompatActivity {
     private TextView opponentText;
     private TextView statusText;
     private TextView scoreText;
-    private EditText chatText;
+    private TextView chatText;
     private TextInputEditText chatInput;
 
     // Callbacks for receiving payloads
@@ -84,7 +86,8 @@ public class SetupMultiplayer extends AppCompatActivity {
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(String endpointId, Payload payload) {
-                    chatText.append(new String(payload.asBytes()) + "\n");
+                    chatText.append(new String(payload.asBytes()));
+                    chatText.append("\n");
                 }
 
                 @Override
@@ -126,9 +129,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                         connectionsClient.stopAdvertising();
 
                         opponentEndpointId = endpointId;
-                        setOpponentName(opponentName);
                         setStatusText("Connected!");
-                        setButtonState(true);
                     } else {
                         Log.i(TAG, "onConnectionResult: connection failed");
                     }
@@ -268,7 +269,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                         new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                statusText.setText("not DISCOVERING! T_T");
+                                statusText.setText("not DISCOVERING!");
                             }
                         });
     }
@@ -295,7 +296,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 // We were unable to start advertising.
-                                statusText.setText("shit something went wrong with advertising");
+                                statusText.setText("Something went wrong with advertising");
                             }
                         });
     }
@@ -306,60 +307,35 @@ public class SetupMultiplayer extends AppCompatActivity {
         opponentName = null;
         opponentScore = 0;
 
-        setOpponentName("No Opponent");
         setStatusText("Disconnected");
-        setButtonState(false);
     }
+//
+//    /** Sends the user's selection of rock, paper, or scissors to the opponent. */
+//    @TargetApi(19)
+//    private void sendGameChoice() {
+//        //myChoice = choice;
+////        connectionsClient.sendPayload(
+////                opponentEndpointId, Payload.fromBytes(choice.getBytes(UTF_8)));
+//
+//        setStatusText("Chose a button: ");
+//        // No changing your mind!
+//        setGameChoicesEnabled(false);
+//    }
 
-    /** Sends the user's selection of rock, paper, or scissors to the opponent. */
-    @TargetApi(19)
-    private void sendGameChoice() {
-        //myChoice = choice;
-//        connectionsClient.sendPayload(
-//                opponentEndpointId, Payload.fromBytes(choice.getBytes(UTF_8)));
-
-        setStatusText("Chose a button: ");
-        // No changing your mind!
-        setGameChoicesEnabled(false);
-    }
-
-    /** Determines the winner and update game state/UI after both players have chosen. */
-    private void finishRound() {
-       //used to wrap up the round
-        setGameChoicesEnabled(true);
-    }
-
-    /** Enables/disables buttons depending on the connection status. */
-    private void setButtonState(boolean connected) {
-        findOpponentButton.setEnabled(true);
-//        findOpponentButton.setVisibility(connected ? View.GONE : View.VISIBLE);
-//        disconnectButton.setVisibility(connected ? View.VISIBLE : View.GONE);
-
-        setGameChoicesEnabled(connected);
-    }
-
-    /** Enables/disables the rock, paper, and scissors buttons. */
-    private void setGameChoicesEnabled(boolean enabled) {
-//        rockButton.setEnabled(enabled);
-//        paperButton.setEnabled(enabled);
-//        scissorsButton.setEnabled(enabled);
-    }
 
     /** Shows a status message to the user. */
     private void setStatusText(String text) {
         statusText.setText(text);
     }
 
-    /** Updates the opponent name on the UI. */
-    private void setOpponentName(String opponentName) {
-        //opponentText.setText("Opponent Name");
-    }
 
     /** Updates the running score ticker. */
     public void sendChat(View view) {
-    
-        Payload chatPayload = Payload.fromBytes(chatInput.getText().toString().getBytes());
+        String input = chatInput.getText().toString();
+        Payload chatPayload = Payload.fromBytes(input.getBytes());
         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+        chatInput.setText("");
+        chatText.append(input + '\n');
     
     
     }
