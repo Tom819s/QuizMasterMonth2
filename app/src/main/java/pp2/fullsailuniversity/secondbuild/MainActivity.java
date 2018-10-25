@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private GoogleApiClient mGoogleApiClient;
     public GoogleSignInAccount accToSend;
-    boolean flag = false;
+    String check = null;
 
     //Sign in Flow Functions
 
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-
     private void singOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
@@ -58,8 +57,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     }
                 });
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
-    }
 
+    }
 
 
     @Override
@@ -108,22 +107,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        String check = getIntent().getStringExtra("thekey");
-        Log.d(TAG, "onStart: -------------" + check);
 
-        if (requestCode == RC_SIGN_IN && check != "confirmed") {
+        if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             signInResultHandler(result);
-
-            updateUI(result);
-        }
-        else
-        {
-            Log.d(TAG, "onStart: -------------" + check);
-            if (check == "confirmed"){
-
-                singOut();
+            Log.d(TAG, "onActivityResult: onactivity result ------" + check);
+            if (check == null) {
+                updateUI(result);
             }
+
         }
     }
 
@@ -171,7 +163,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
             goToMainMenu.putExtra("myKey", userData);
-             flag = false;
             startActivity(goToMainMenu);
         }
     }
@@ -179,44 +170,56 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onStart() {
         super.onStart();
-        String check = getIntent().getStringExtra("thekey");
+
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+
+        // Array data as follows
+        //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
+        Log.d(TAG, "onStart: onStart check" + check);
+       /* if (check == null && account != null) {
+
+
+            Intent goToMainMenu = new Intent(this, MainMenu.class);
+
+
+            String[] userData = new String[3];
+
+
+            userData[0] = account.getDisplayName();
+            userData[1] = account.getEmail();
+            if (account.getPhotoUrl() != null)
+                userData[2] = account.getPhotoUrl().toString();
+            else {
+                userData[2] = "DEFAULT IMAGE";
+                Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
+            }
+
+
+            Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
+            goToMainMenu.putExtra("myKey", userData);
+
+            startActivity(goToMainMenu);
+
+
+        }*/
+        check = getIntent().getStringExtra("thekey");
+
         Log.d(TAG, "onStart: -------------" + check);
 
+        if (check == null) {
+            startSignIn();
+
+            Log.d(TAG, "onStart: it is signed ---------------------------------" + check);
+        }
         if(check != null)
         {
-            flag = true;
+            Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show();
+            check = null;
+            singOut();
+
         }
-
-       if(check == null && flag == false) {
-           Intent goToMainMenu = new Intent(this, MainMenu.class);
-
-
-           GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-           // Array data as follows
-           //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
-           String[] userData = new String[3];
-
-
-           if (account != null) {
-
-               userData[0] = account.getDisplayName();
-               userData[1] = account.getEmail();
-               if (account.getPhotoUrl() != null)
-                   userData[2] = account.getPhotoUrl().toString();
-               else {
-                   userData[2] = "DEFAULT IMAGE";
-                   Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
-               }
-
-               Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
-               goToMainMenu.putExtra("myKey", userData);
-
-               startActivity(goToMainMenu);
-           }
-       }
-       else {
-           Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show();
-       }
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
 
