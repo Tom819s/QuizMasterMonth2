@@ -277,24 +277,25 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Broadcasts our presence using Nearby Connections so other players can find us. */
     private void startAdvertising() {
-//        Nearby.getConnectionsClient(getApplicationContext()).startAdvertising(
-////                getUserNickname(),
-////                SERVICE_ID,
-////                mConnectionLifecycleCallback,
-////            new AdvertisingOptions.Builder().setStrategy(STRATEGY))
-////                .addOnSuccessListener(
-////                        new OnSuccessListener<Void>() {
-////                            @Override
-////                            public void onSuccess(Void unusedResult) {// We're advertising!
-////                            }
-////                        })
-////                .addOnFailureListener(
-////                        new OnFailureListener() {
-////                            @Override
-////                            public void onFailure(@NonNull Exception e) {
-////                                // We were unable to start advertising.
-////                            }
-////                        });
+        AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
+        Nearby.getConnectionsClient(getApplicationContext()).startAdvertising("User",
+                SERVICE_ID,
+                connectionLifecycleCallback,
+                options.build()
+            )
+                .addOnSuccessListener(
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unusedResult) {// We're advertising!
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // We were unable to start advertising.
+                            }
+                        });
     }
 
     /** Wipes all game state and updates the UI accordingly. */
