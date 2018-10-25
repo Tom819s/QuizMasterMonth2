@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -147,6 +148,7 @@ public class SetupMultiplayer extends AppCompatActivity {
         super.onCreate(bundle);
         setContentView(R.layout.multiplayer_join_activity);
 
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         findOpponentButton = findViewById(R.id.findOpponentButton);
         disconnectButton = findViewById(R.id.disconnect);
         testMedal = findViewById(R.id.TestMedalButton);
