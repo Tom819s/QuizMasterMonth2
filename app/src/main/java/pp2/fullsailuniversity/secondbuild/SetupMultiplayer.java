@@ -23,9 +23,11 @@ import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -86,7 +88,7 @@ public class SetupMultiplayer extends AppCompatActivity {
     private TextView statusText;
     private TextView scoreText;
     private TextView chatText;
-    private TextInputEditText chatInput;
+    private EditText chatInput;
 
     // Callbacks for receiving payloads
     private final PayloadCallback payloadCallback =
@@ -162,8 +164,20 @@ public class SetupMultiplayer extends AppCompatActivity {
         statusText = findViewById(R.id.statusText);
         chatText = findViewById(R.id.chatTextBox);
         chatText.setMovementMethod(new ScrollingMovementMethod());
-        chatInput = findViewById(R.id.textEnter);
+        chatInput = findViewById(R.id.editText);
         sendChat = findViewById(R.id.sendChat);
+
+        chatInput.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                    sendChat.callOnClick();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
         Random random = new Random();
 
         // create a big random number - maximum is ffffff (hex) = 16777215 (dez)
