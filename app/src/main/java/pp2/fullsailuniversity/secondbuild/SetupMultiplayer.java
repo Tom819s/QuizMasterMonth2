@@ -137,7 +137,7 @@ public class SetupMultiplayer extends AppCompatActivity {
 
                         connectionsClient.stopDiscovery();
                         connectionsClient.stopAdvertising();
-
+                        Toast.makeText(getApplicationContext(),"Connected!", Toast.LENGTH_LONG).show();
                         opponentEndpointId = endpointId;
                         setStatusText("Connected!");
                     } else {
