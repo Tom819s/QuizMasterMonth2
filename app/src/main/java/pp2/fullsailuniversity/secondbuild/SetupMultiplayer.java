@@ -1,8 +1,8 @@
 package pp2.fullsailuniversity.secondbuild;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,13 +10,17 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.nearby.Nearby;
@@ -68,24 +72,25 @@ public class SetupMultiplayer extends AppCompatActivity {
     private String opponentName;
     private int opponentScore;
 
-    private Button findOpponentButton, disconnectButton, testMedal;
+    private Button findOpponentButton, disconnectButton, testMedal, sendChat;
     private TextView opponentText;
     private TextView statusText;
     private TextView scoreText;
+    private EditText chatText;
+    private TextInputEditText chatInput;
 
     // Callbacks for receiving payloads
     private final PayloadCallback payloadCallback =
             new PayloadCallback() {
                 @Override
                 public void onPayloadReceived(String endpointId, Payload payload) {
-//                    opponentChoice = GameChoice.valueOf(new String(payload.asBytes(), UTF_8));
+                    chatText.append(new String(payload.asBytes()) + "\n");
                 }
 
                 @Override
                   public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
-//                   if (update.getStatus() == Status.SUCCESS && myChoice != null && opponentChoice != null) {
-//                       finishRound();
-//                    }
+//                   update progress of incoming and outgoing payloads
+                    //called when first byte is received, not whole payload !!!!
                 }
             };
 
@@ -145,7 +150,9 @@ public class SetupMultiplayer extends AppCompatActivity {
         disconnectButton = findViewById(R.id.disconnect);
         testMedal = findViewById(R.id.TestMedalButton);
         statusText = findViewById(R.id.statusText);
-
+        chatText = findViewById(R.id.chatTextBox);
+        chatInput = findViewById(R.id.textEnter);
+        sendChat = findViewById(R.id.sendChat);
 
         connectionsClient = Nearby.getConnectionsClient(this);
 
@@ -212,17 +219,23 @@ public class SetupMultiplayer extends AppCompatActivity {
     }
 
     /** Finds an opponent to play the game with using Nearby Connections. */
-    public void findOpponent(View view) {
-        startAdvertising();
-        startDiscovery();
+    
+    public void advertiseConnection(View view) {
+    
         setStatusText("Searching....");
-        findOpponentButton.setEnabled(false);
+        startAdvertising();
+    }
+    
+    public void findConnection(View view) {
+    
+        setStatusText("Searching....");
+        startDiscovery();
     }
 
     /** Disconnects from the opponent and reset the UI. */
     public void disconnect(View view) {
         connectionsClient.disconnectFromEndpoint(opponentEndpointId);
-        resetGame();
+        setStatusText("DISCONNECTED FROM CONNECTION");
     }
 
     /** Sends a {GameChoice} to the other player. */
@@ -239,42 +252,29 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Starts looking for other players using Nearby Connections. */
     private void startDiscovery() {
-        // Note: Discovery may fail. To keep this demo simple, we don't handle failures.
-        connectionsClient.startDiscovery(
-                getPackageName(), endpointDiscoveryCallback,
-                new DiscoveryOptions.Builder().setStrategy(STRATEGY).build());
+        DiscoveryOptions.Builder options = new DiscoveryOptions.Builder().setStrategy(STRATEGY);
+        Nearby.getConnectionsClient(getApplicationContext()).startDiscovery(
+                SERVICE_ID,
+                endpointDiscoveryCallback,
+                options.build())
+                .addOnSuccessListener(
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unusedResult) {
+                                statusText.setText("DISCOVERING!");
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                statusText.setText("not DISCOVERING! T_T");
+                            }
+                        });
     }
-
-    public void randomMedal(View view){
-
-        LayoutInflater toastInflater = getLayoutInflater();
-        Random rand = new Random();
-
-        int result = rand.nextInt()%5;
-
-        if (result == 0){
-        view = toastInflater.inflate(R.layout.medal_1,
-                findViewById(R.id.relativeLayout1));
-        }
-        else if (result == 1){
-            view = toastInflater.inflate(R.layout.medal_2,
-                    findViewById(R.id.relativeLayout1));
-        }else if (result == 2){
-            view = toastInflater.inflate(R.layout.medal_3,
-                    findViewById(R.id.relativeLayout1));
-        }else if (result == 3){
-            view = toastInflater.inflate(R.layout.medal_4,
-                    findViewById(R.id.relativeLayout1));
-        }else{
-            view = toastInflater.inflate(R.layout.medal_5,
-                    findViewById(R.id.relativeLayout1));
-        }
-        Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
-        toast.setView(view);
-        toast.show();
-    }
-
+    
+    
+    
     /** Broadcasts our presence using Nearby Connections so other players can find us. */
     private void startAdvertising() {
         AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
@@ -287,6 +287,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                         new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unusedResult) {// We're advertising!
+                                statusText.setText("ADVERTISING!!!");
                             }
                         })
                 .addOnFailureListener(
@@ -294,6 +295,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 // We were unable to start advertising.
+                                statusText.setText("shit something went wrong with advertising");
                             }
                         });
     }
@@ -354,7 +356,41 @@ public class SetupMultiplayer extends AppCompatActivity {
     }
 
     /** Updates the running score ticker. */
-    private void updateScore(int myScore, int opponentScore) {
-        //scoreText.setText("");
+    public void sendChat(View view) {
+    
+        Payload chatPayload = Payload.fromBytes(chatInput.getText().toString().getBytes());
+        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+    
+    
+    }
+    
+    public void randomMedal(View view){
+        
+        LayoutInflater toastInflater = getLayoutInflater();
+        Random rand = new Random();
+        
+        int result = rand.nextInt()%5;
+        
+        if (result == 0){
+            view = toastInflater.inflate(R.layout.medal_1,
+                    findViewById(R.id.relativeLayout1));
+        }
+        else if (result == 1){
+            view = toastInflater.inflate(R.layout.medal_2,
+                    findViewById(R.id.relativeLayout1));
+        }else if (result == 2){
+            view = toastInflater.inflate(R.layout.medal_3,
+                    findViewById(R.id.relativeLayout1));
+        }else if (result == 3){
+            view = toastInflater.inflate(R.layout.medal_4,
+                    findViewById(R.id.relativeLayout1));
+        }else{
+            view = toastInflater.inflate(R.layout.medal_5,
+                    findViewById(R.id.relativeLayout1));
+        }
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
     }
 }
