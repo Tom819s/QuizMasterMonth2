@@ -83,7 +83,7 @@ public class SetupMultiplayer extends AppCompatActivity {
     private String opponentName, userName;
     private int opponentScore;
 
-    private Button findOpponentButton, disconnectButton, testMedal, sendChat;
+    private Button findOpponentButton, disconnectButton, testMedal, sendChat, discover;
     private TextView opponentText;
     private TextView statusText;
     private TextView scoreText;
@@ -128,6 +128,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                     Log.i(TAG, "onConnectionInitiated: accepting connection");
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                     opponentName = connectionInfo.getEndpointName();
+
                 }
 
                 @Override
@@ -137,11 +138,12 @@ public class SetupMultiplayer extends AppCompatActivity {
 
                         connectionsClient.stopDiscovery();
                         connectionsClient.stopAdvertising();
-                        Toast.makeText(getApplicationContext(),"Connected!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(),"Connected to " + opponentName, Toast.LENGTH_LONG).show();
                         opponentEndpointId = endpointId;
                         setStatusText("Connected!");
                     } else {
                         Log.i(TAG, "onConnectionResult: connection failed");
+                        Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG);
                     }
                 }
 
@@ -159,6 +161,7 @@ public class SetupMultiplayer extends AppCompatActivity {
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         findOpponentButton = findViewById(R.id.findOpponentButton);
+        discover = findViewById(R.id.discoverButton);
         disconnectButton = findViewById(R.id.disconnect);
         testMedal = findViewById(R.id.TestMedalButton);
         statusText = findViewById(R.id.statusText);
@@ -264,12 +267,15 @@ public class SetupMultiplayer extends AppCompatActivity {
     
         setStatusText("Searching....");
         startDiscovery();
+        ;
     }
 
     /** Disconnects from the opponent and reset the UI. */
     public void disconnect(View view) {
         resetGame();
         setStatusText("DISCONNECTED FROM CONNECTION");
+        findOpponentButton.setEnabled(true);
+        discover.setEnabled(true);
     }
 
     /** Sends a {GameChoice} to the other player. */
@@ -286,6 +292,8 @@ public class SetupMultiplayer extends AppCompatActivity {
 
     /** Starts looking for other players using Nearby Connections. */
     private void startDiscovery() {
+        discover.setEnabled(false);
+        findOpponentButton.setEnabled(false);
         DiscoveryOptions.Builder options = new DiscoveryOptions.Builder().setStrategy(STRATEGY);
         Nearby.getConnectionsClient(getApplicationContext()).startDiscovery(
                 SERVICE_ID,
@@ -303,6 +311,9 @@ public class SetupMultiplayer extends AppCompatActivity {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 statusText.setText("not DISCOVERING!");
+                                discover.setEnabled(true);
+                                findOpponentButton.setEnabled(true);
+                                Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
                             }
                         });
     }
@@ -311,6 +322,8 @@ public class SetupMultiplayer extends AppCompatActivity {
     
     /** Broadcasts our presence using Nearby Connections so other players can find us. */
     private void startAdvertising() {
+        findOpponentButton.setEnabled(false);
+        discover.setEnabled(false);
         AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
         Nearby.getConnectionsClient(getApplicationContext()).startAdvertising("User",
                 SERVICE_ID,
@@ -330,6 +343,9 @@ public class SetupMultiplayer extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 // We were unable to start advertising.
                                 statusText.setText("Something went wrong with advertising");
+                                Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
+                                findOpponentButton.setEnabled(true);
+                                discover.setEnabled(true);
                             }
                         });
     }
