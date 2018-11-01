@@ -71,9 +71,9 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         Log.d(TAG, "onCreate: gametime" + gameTime);
 
         ProgressBar pbar = findViewById(R.id.progressBar);
-        b1 = findViewById(R.id.button1);
+        b1 = findViewById(R.id.button3);
         b2 = findViewById(R.id.button2);
-        b3 = findViewById(R.id.button3);
+        b3 = findViewById(R.id.button1);
         b4 = findViewById(R.id.button4);
         questioncounter = findViewById(R.id.questionNumber);
         scorecounter = findViewById(R.id.score);

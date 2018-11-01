@@ -35,7 +35,7 @@ public class QuizQuestion implements Serializable {
             quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n' + answers[2] + '\n' + answers[3] + '\n' + whichIsRight();
         } else {
             quizString = "QUIZ QUESTION TF\n";
-            quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n' + whichIsRight();
+            quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n';
         }
         return quizString;
     }

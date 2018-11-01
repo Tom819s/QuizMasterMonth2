@@ -125,8 +125,12 @@ public class MainMenu extends AppCompatActivity
 
 
         if (userData != null) {
-            int duration = Toast.LENGTH_LONG;
-            Toast toast = Toast.makeText(this, "Logged in as : " + userData[0], duration);
+            Toast toast;
+            if (userData[0] != null)
+            toast = Toast.makeText(getApplicationContext(), "Logged in as : " + userData[0], Toast.LENGTH_LONG);
+            else
+                toast = Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_LONG);
+
             toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
 
             toast.show();
