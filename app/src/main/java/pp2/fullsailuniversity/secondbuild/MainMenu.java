@@ -40,8 +40,6 @@ public class MainMenu extends AppCompatActivity
     private static final int REQ_CODE = 101;
 
 
-
-
     public Button multi, lobby, quickStart;
     private static String[] userDataInformation;
     private MediaPlayer menuMusic;
@@ -82,6 +80,8 @@ public class MainMenu extends AppCompatActivity
                     finish();
                     if (menuMusic.isPlaying())
                         menuMusic.stop();
+                    menuMusic.release();
+                    menuMusic = null;
                     Intent goToGame = new Intent(MainMenu.this, MainGameActivity.class);
                     goToGame.putExtra("myKey", 20);
                     startActivity(goToGame);
@@ -99,10 +99,12 @@ public class MainMenu extends AppCompatActivity
 
                 if (menuMusic.isPlaying())
                     menuMusic.stop();
-                    finish();
-                    Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
-                    startActivity(goToGame);
-                    overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                menuMusic.release();
+                menuMusic = null;
+                finish();
+                Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
+                startActivity(goToGame);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
             }
         });
@@ -185,7 +187,6 @@ public class MainMenu extends AppCompatActivity
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -234,6 +235,8 @@ public class MainMenu extends AppCompatActivity
 
         if (menuMusic.isPlaying())
             menuMusic.stop();
+        menuMusic.release();
+        menuMusic = null;
         Intent gotToGameSetup = new Intent(this, GameSetup.class);
         startActivity(gotToGameSetup);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -243,17 +246,18 @@ public class MainMenu extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if (menuMusic.isPlaying())
+        if (menuMusic != null && menuMusic.isPlaying())
             menuMusic.stop();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (!menuMusic.isPlaying()){
-        menuMusic = MediaPlayer.create(MainMenu.this, R.raw.menuloop);
-        menuMusic.setLooping(true);
-        menuMusic.start();}
+        if (menuMusic == null || !menuMusic.isPlaying()) {
+            menuMusic = MediaPlayer.create(MainMenu.this, R.raw.menuloop);
+            menuMusic.setLooping(true);
+            menuMusic.start();
+        }
     }
 
     @Override

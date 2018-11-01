@@ -153,22 +153,20 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         startbtn = findViewById(R.id.start_button);
         timerText = findViewById(R.id.timerTextView);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build();
             rightwrongSound = new SoundPool.Builder()
-            .setMaxStreams(2)
-            .setAudioAttributes(audioAttributes)
-            .build();
-        }
-        else {
+                    .setMaxStreams(2)
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+        } else {
             rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
         }
         rightChime = rightwrongSound.load(this, R.raw.correct, 1);
         wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
-
 
 
         loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
@@ -284,7 +282,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
             correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -293,8 +291,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         .setMaxStreams(2)
                         .setAudioAttributes(audioAttributes)
                         .build();
-            }
-            else {
+            } else {
                 rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
             }
             rightChime = rightwrongSound.load(this, R.raw.correct, 1);
@@ -606,7 +603,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
 
-                    rightwrongSound.play(rightChime, 1,1,0,0,1);
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     if (millisToAnswer < 2500) {
                         score.set(score.get() + 10);
                         displayMedal4();
@@ -634,7 +631,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
 
-                    rightwrongSound.play(wrongChime, 1,1,0,0,1);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
                     timerText.setText("Wrong!");
                     timerText.setTextColor(Color.rgb(255, 0, 0));
                     b1.setBackgroundColor(Color.RED);
@@ -690,7 +687,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b4.setEnabled(false);
                 if (b2.getTag() == "true") {
 
-                    rightwrongSound.play(rightChime, 1,1,0,0,1);
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
                     if (millisToAnswer < 2500) {
@@ -722,7 +719,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
 
-                    rightwrongSound.play(wrongChime, 1,1,0,0,1);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
                     timerText.setText("Wrong!");
                     timerText.setTextColor(Color.rgb(255, 0, 0));
 
@@ -778,7 +775,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b4.setEnabled(false);
 
                 if (b3.getTag() == "true") {
-                    rightwrongSound.play(rightChime,1,1,0,0,1);
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     if (millisToAnswer < 2500) {
                         score.set(score.get() + 10);
                         displayMedal4();
@@ -810,7 +807,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
-                    rightwrongSound.play(wrongChime,1,1,0,0,1);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
                     if (b1.getTag() == "true")
                         b1.setBackgroundColor(Color.GREEN);
                     else if (b2.getTag() == "true")
@@ -864,7 +861,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b4.setEnabled(false);
 
                 if (b4.getTag() == "true") {
-                    rightwrongSound.play(rightChime,1,1,0,0,1);
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
                     if (millisToAnswer < 2500) {
@@ -894,7 +891,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
-                    rightwrongSound.play(wrongChime,1,1,0,0,1);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
                     timerText.setText("Wrong!");
                     timerText.setTextColor(Color.RED);
                     if (b1.getTag() == "true")
@@ -1019,14 +1016,43 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     String receivedString = new String(payload.asBytes());
                     String lines[] = receivedString.split("\\r?\\n");
 
-                    switch(lines[0]){
-                        case "QUIZ QUESTION":
-                        case "END GAME":{
-
+                    switch (lines[0]) {
+                        case "QUIZ QUESTION": {
+                            //setupScreen(lines)
+                            //run code to set up reg. MC question
                             break;
                         }
-                        default:{
-                            Toast.makeText(getApplicationContext(),"Issue with payload", Toast.LENGTH_LONG);
+                        case "QUIZ QUESTION TF": {
+                            //setupScreenTF(lines)
+                            //run code to set up TF question
+                            break;
+                        }
+                        case "DEBUFF": {
+                            //takeDamage(lines)
+                            //run code to debuff player based on what opponent sent
+                            break;
+                        }
+                        case "WAIT": {
+                            //waitScreen()
+                            //run code to setup debuff screen and wait for next question
+                        }
+                        case "START TIMER": {
+                            //startTiming()
+                            //run code to start timer
+                            break;
+                        }
+                        case "TIMER SUBMITTED": {
+                            //compareTimes(lines)
+                            //run code to compare times, if host hasn't hit timer yet, by default opponent wins
+                            break;
+                        }
+                        case "END GAME": {
+                            //gotoResults(lines)
+                            // run code to load results screen
+                            break;
+                        }
+                        default: {
+                            Toast.makeText(getApplicationContext(), "Issue with payload", Toast.LENGTH_LONG);
                         }
                     }
                 }
@@ -1184,8 +1210,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         statusText.setText(text);
     }
 
-    private void sendQuizQuestion(int i){
-        if (isHost){
+    private void sendQuizQuestion(int i) {
+        if (isHost) {
             Payload chatPayload = Payload.fromBytes(quiz.get(i).toString().getBytes());
             Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
         }

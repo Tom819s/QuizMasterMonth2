@@ -182,16 +182,18 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     protected void onPause() {
         super.onPause();
         hasStopped = true;
-        if (loopingElectro.isPlaying())
+        if (loopingElectro != null && loopingElectro.isPlaying())
             loopingElectro.stop();
-        if (tickingSound.isPlaying())
+        if (tickingSound != null && tickingSound.isPlaying())
             tickingSound.stop();
-        if (alarm.isPlaying())
+        if (alarm != null && alarm.isPlaying())
             alarm.stop();
         if (gameTimer != null)
             gameTimer.cancel();
         if (timesup != null)
             timesup.cancel();
+
+
     }
 
     @Override
@@ -200,7 +202,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         super.onResume();
 
         if (hasStopped) {
-            if (!loopingElectro.isPlaying()) {
+            if (loopingElectro == null || !loopingElectro.isPlaying()) {
                 loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
                 loopingElectro.setLooping(true);
                 loopingElectro.start();
@@ -462,8 +464,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
                 int randomIndex = (int) (Math.random() * 1000) % 3;
                 buttons.remove(randomIndex);
-            }
-            else {
+            } else {
                 b1.setEnabled(true);
                 b3.setEnabled(true);
                 b2.setEnabled(false);
@@ -489,14 +490,12 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                 b3.setText("false");
 
 
-                if (quiz.get(index).correctAns)
-                {
+                if (quiz.get(index).correctAns) {
                     b1.setTag("true");
                 } else
                     b1.setTag("false");
 
-                if (quiz.get(index).correctAns)
-                {
+                if (quiz.get(index).correctAns) {
                     b3.setTag("false");
                 } else
                     b3.setTag("true");
@@ -517,6 +516,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         } else {
                             i.set(quiz.size());
                             Intent results = new Intent(MainGameActivity.this, Results.class);
+                            tickingSound.release();
+                            loopingElectro.release();
+                            alarm.release();
+
+                            tickingSound = null;
+                            loopingElectro = null;
+                            alarm = null;
                             int[] gameResults = new int[3];
                             gameResults[0] = i.get();
                             gameResults[1] = score.get();
@@ -896,6 +902,15 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             public void onClick(DialogInterface dialog, int which) {
                 tickingSound.stop();
                 gameTimer.cancel();
+
+                tickingSound.release();
+                loopingElectro.release();
+                alarm.release();
+
+                tickingSound = null;
+                loopingElectro = null;
+                alarm = null;
+
                 Intent menuActivity = new Intent(MainGameActivity.this, MainMenu.class);
                 finish();
                 startActivity(menuActivity);

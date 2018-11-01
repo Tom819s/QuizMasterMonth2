@@ -98,11 +98,13 @@ public class GameSetup extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (!menuMusic.isPlaying()){
+        if (!menuMusic.isPlaying()) {
             menuMusic = MediaPlayer.create(GameSetup.this, R.raw.menuloop);
             menuMusic.setLooping(true);
-            menuMusic.start();}
+            menuMusic.start();
+        }
     }
+
     public void playButtonHandler(View view) {
         try {
             int catID = categoriesRadio.getCheckedRadioButtonId();
