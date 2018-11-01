@@ -82,7 +82,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 
-public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable {
+public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable
+{
     private static final String TAG = "MainActivityGame";
 
 
@@ -125,7 +126,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         Log.d(TAG, "onCreate: starts");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_game);
@@ -153,7 +155,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         startbtn = findViewById(R.id.start_button);
         timerText = findViewById(R.id.timerTextView);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -162,7 +165,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     .setMaxStreams(2)
                     .setAudioAttributes(audioAttributes)
                     .build();
-        } else {
+        } else
+        {
             rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
         }
         rightChime = rightwrongSound.load(this, R.raw.correct, 1);
@@ -194,15 +198,18 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         getTriviaJSONData.execute(urlToAPI);
 
 
-        gameTimer = new CountDownTimer(20000, 250) {
+        gameTimer = new CountDownTimer(20000, 250)
+        {
             @Override
-            public void onTick(long millisUntilFinished) {
+            public void onTick(long millisUntilFinished)
+            {
                 Log.d(TAG, "attempting to start game..");
                 startbtn.callOnClick();
             }
 
             @Override
-            public void onFinish() {
+            public void onFinish()
+            {
 
                 Context context = getApplicationContext();
                 CharSequence text = "Problem Loading";
@@ -217,7 +224,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         startbtn.setOnClickListener(v ->
                 {
 
-                    if (quiz != null && quiz.size() > 0) {
+                    if (quiz != null && quiz.size() > 0)
+                    {
                         pbar.setAlpha(0.0f);
                         pbar.setClickable(false);
                         startbtn.setClickable(false);
@@ -240,7 +248,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
 
         if (loopingElectro.isPlaying())
             loopingElectro.stop();
@@ -252,7 +261,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         hasStopped = true;
         if (loopingElectro.isPlaying())
@@ -268,12 +278,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         Log.d(TAG, "onResume starts");
         super.onResume();
 
-        if (hasStopped) {
-            if (!loopingElectro.isPlaying()) {
+        if (hasStopped)
+        {
+            if (!loopingElectro.isPlaying())
+            {
                 loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
                 loopingElectro.setLooping(true);
                 loopingElectro.start();
@@ -282,7 +295,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
             correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            {
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
                         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -291,25 +305,32 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         .setMaxStreams(2)
                         .setAudioAttributes(audioAttributes)
                         .build();
-            } else {
+            } else
+            {
                 rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
             }
             rightChime = rightwrongSound.load(this, R.raw.correct, 1);
             wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
 
-            gameTimer = new CountDownTimer(timeLeft, 1000) {
+            gameTimer = new CountDownTimer(timeLeft, 1000)
+            {
 
-                public void onTick(long millisUntilFinished) {
+                public void onTick(long millisUntilFinished)
+                {
 
                     String count = Long.toString(millisUntilFinished / 1000);
                     millisToAnswer = gameTime - millisUntilFinished;
                     timeLeft = millisUntilFinished;
-                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
+                    if (millisUntilFinished > (gameTime / 2 + 1000))
+                    {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
-                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000))
+                    {
                         timerText.setTextColor(Color.rgb(255, 204, 0));
-                    } else {
-                        if (!tickingSound.isPlaying()) {
+                    } else
+                    {
+                        if (!tickingSound.isPlaying())
+                        {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
                         }
@@ -318,7 +339,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     timerText.setText(count);
                 }
 
-                public void onFinish() {
+                public void onFinish()
+                {
                     tickingSound.stop();
                     alarm.setVolume(5.0f, 5.0f);
                     alarm.start();
@@ -340,14 +362,17 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
                     scorecounter.setText("Score: " + score.toString());
 
-                    timesup = new CountDownTimer(moveonLeft, 1000) {
+                    timesup = new CountDownTimer(moveonLeft, 1000)
+                    {
                         @Override
-                        public void onTick(long millisUntilFinished) {
+                        public void onTick(long millisUntilFinished)
+                        {
                             moveonLeft = millisUntilFinished;
                         }
 
                         @Override
-                        public void onFinish() {
+                        public void onFinish()
+                        {
                             next.callOnClick();
                         }
                     }.start();
@@ -361,25 +386,31 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     @Override
-    public void onDataAvailable(List<QuizQuestion> data, DownloadStatus status) {
-        if (status == DownloadStatus.OK) {
+    public void onDataAvailable(List<QuizQuestion> data, DownloadStatus status)
+    {
+        if (status == DownloadStatus.OK)
+        {
             Log.d(TAG, "onDataAvailable: data is " + data);
             quiz = data;
-        } else {
+        } else
+        {
             // download or processing failed
             Log.e(TAG, "onDataAvailable failed with status " + status);
         }
     }
 
-    public void GameLoop(int index) {
+    public void GameLoop(int index)
+    {
 
         timeLeft = 0;
         moveonLeft = 0;
-        if (tickingSound.isPlaying()) {
+        if (tickingSound.isPlaying())
+        {
             tickingSound.stop();
         }
 
-        if (alarm.isPlaying()) {
+        if (alarm.isPlaying())
+        {
             alarm.stop();
         }
 
@@ -387,7 +418,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             timesup.cancel();
         gameTimer.cancel();
 
-        if (quiz != null && index < quiz.size()) {
+        if (quiz != null && index < quiz.size())
+        {
             tickingSound.stop();
             tickingSound.release();
             tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
@@ -400,22 +432,29 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
             numQuestions = quiz.size();
             questioncounter.setText("Question: " + (index + 1) + " / " + numQuestions);
-            gameTimer = new CountDownTimer(gameTime, 1000) {
+            gameTimer = new CountDownTimer(gameTime, 1000)
+            {
 
-                public void onTick(long millisUntilFinished) {
+                public void onTick(long millisUntilFinished)
+                {
 
                     String count = Long.toString(millisUntilFinished / 1000);
                     millisToAnswer = gameTime - millisUntilFinished;
                     timeLeft = millisUntilFinished;
-                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
+                    if (millisUntilFinished > (gameTime / 2 + 1000))
+                    {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
-                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000))
+                    {
                         timerText.setTextColor(Color.rgb(255, 204, 0));
-                    } else {
-                        if (!tickingSound.isPlaying()) {
+                    } else
+                    {
+                        if (!tickingSound.isPlaying())
+                        {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
-                            if (hints) {
+                            if (hints)
+                            {
                                 buttons.get(0).setEnabled(false);
                                 buttons.get(1).setEnabled(false);
                             }
@@ -425,7 +464,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     timerText.setText(count);
                 }
 
-                public void onFinish() {
+                public void onFinish()
+                {
                     tickingSound.stop();
                     alarm.setVolume(5.0f, 5.0f);
                     alarm.start();
@@ -447,14 +487,17 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
                     scorecounter.setText("Score: " + score.toString());
 
-                    timesup = new CountDownTimer(5000, 1000) {
+                    timesup = new CountDownTimer(5000, 1000)
+                    {
                         @Override
-                        public void onTick(long millisUntilFinished) {
+                        public void onTick(long millisUntilFinished)
+                        {
                             moveonLeft = millisUntilFinished;
                         }
 
                         @Override
-                        public void onFinish() {
+                        public void onFinish()
+                        {
                             next.callOnClick();
                         }
                     }.start();
@@ -526,9 +569,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             } else
                 b4.setTag("false");
 
-            for (int i = 0; i < buttons.size(); ++i) {
+            for (int i = 0; i < buttons.size(); ++i)
+            {
 
-                if (buttons.get(i).getTag() == "true") {
+                if (buttons.get(i).getTag() == "true")
+                {
                     buttons.remove(i);
                 }
             }
@@ -538,17 +583,18 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 // set string values for the questions
             next.setOnClickListener((view) ->
-
                     {
                         gameTimer.cancel();
                         if (timesup != null)
                             timesup.cancel();
                         next.setEnabled(false);
 
-                        if (i.get() < quiz.size() - 1) {
+                        if (i.get() < quiz.size() - 1)
+                        {
                             i.set(i.get() + 1); //increment index for the game loop
                             GameLoop(i.get()); //call game loop with new index value
-                        } else {
+                        } else
+                        {
                             i.set(quiz.size());
                             Intent results = new Intent(MultiplayerGame.this, Results.class);
                             int[] gameResults = new int[3];
@@ -569,14 +615,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
             //next button functionality
             b1.setOnClickListener((view) ->
-
             {
-                if (tickingSound.isPlaying()) {
+                if (tickingSound.isPlaying())
+                {
                     tickingSound.stop();
                     tickingSound.reset();
                 }
 
-                if (alarm.isPlaying()) {
+                if (alarm.isPlaying())
+                {
                     alarm.stop();
                     alarm.reset();
                 }
@@ -587,24 +634,29 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b4.setEnabled(false);
                 next.setEnabled(true);
                 gameTimer.cancel();
-                gameTimer = new CountDownTimer(5000, 1000) {
+                gameTimer = new CountDownTimer(5000, 1000)
+                {
                     @Override
-                    public void onTick(long millisUntilFinished) {
+                    public void onTick(long millisUntilFinished)
+                    {
                         //do nothing
                     }
 
                     @Override
-                    public void onFinish() {
+                    public void onFinish()
+                    {
                         next.callOnClick();
                     }
                 }.start();
 
-                if (b1.getTag() == "true") {
+                if (b1.getTag() == "true")
+                {
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
 
                     rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
-                    if (millisToAnswer < 2500) {
+                    if (millisToAnswer < 2500)
+                    {
                         score.set(score.get() + 10);
                         displayMedal4();
                     } else if (millisToAnswer < 6000)
@@ -620,12 +672,14 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     numInRow += 1;
                     numCorrect += 1;
 
-                    if (numInRow == 3) {
+                    if (numInRow == 3)
+                    {
                         displayMedal2();
                         score.set(score.get() + 5);
                         numInRow = 0;
                     }
-                } else {
+                } else
+                {
                     numInRow = 0;
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
@@ -653,29 +707,33 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 
             b2.setOnClickListener((view) ->
-
             {
 
-                if (tickingSound.isPlaying()) {
+                if (tickingSound.isPlaying())
+                {
                     tickingSound.stop();
                     tickingSound.reset();
                 }
 
-                if (alarm.isPlaying()) {
+                if (alarm.isPlaying())
+                {
                     alarm.stop();
                     alarm.reset();
                 }
 
                 gameTimer.cancel();
 
-                gameTimer = new CountDownTimer(5000, 1000) {
+                gameTimer = new CountDownTimer(5000, 1000)
+                {
                     @Override
-                    public void onTick(long millisUntilFinished) {
+                    public void onTick(long millisUntilFinished)
+                    {
 
                     }
 
                     @Override
-                    public void onFinish() {
+                    public void onFinish()
+                    {
                         next.callOnClick();
                     }
                 }.start();
@@ -685,12 +743,14 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b2.setEnabled(false);
                 b3.setEnabled(false);
                 b4.setEnabled(false);
-                if (b2.getTag() == "true") {
+                if (b2.getTag() == "true")
+                {
 
                     rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
-                    if (millisToAnswer < 2500) {
+                    if (millisToAnswer < 2500)
+                    {
                         score.set(score.get() + 10);
                         displayMedal4();
                     } else if (millisToAnswer < 6000)
@@ -706,13 +766,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     numInRow += 1;
                     numCorrect += 1;
 
-                    if (numInRow == 3) {
+                    if (numInRow == 3)
+                    {
                         displayMedal2();
                         score.set(score.get() + 5);
                         numInRow = 0;
                     }
 
-                } else {
+                } else
+                {
                     numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
@@ -743,27 +805,31 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 
             b3.setOnClickListener((view) ->
-
             {
-                if (tickingSound.isPlaying()) {
+                if (tickingSound.isPlaying())
+                {
                     tickingSound.stop();
                     tickingSound.reset();
                 }
 
-                if (alarm.isPlaying()) {
+                if (alarm.isPlaying())
+                {
                     alarm.stop();
                     alarm.reset();
                 }
 
                 gameTimer.cancel();
-                gameTimer = new CountDownTimer(5000, 1000) {
+                gameTimer = new CountDownTimer(5000, 1000)
+                {
                     @Override
-                    public void onTick(long millisUntilFinished) {
+                    public void onTick(long millisUntilFinished)
+                    {
 
                     }
 
                     @Override
-                    public void onFinish() {
+                    public void onFinish()
+                    {
                         next.callOnClick();
                     }
                 }.start();
@@ -774,9 +840,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b3.setEnabled(false);
                 b4.setEnabled(false);
 
-                if (b3.getTag() == "true") {
+                if (b3.getTag() == "true")
+                {
                     rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
-                    if (millisToAnswer < 2500) {
+                    if (millisToAnswer < 2500)
+                    {
                         score.set(score.get() + 10);
                         displayMedal4();
                     } else if (millisToAnswer < 6000)
@@ -795,13 +863,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     numInRow += 1;
                     numCorrect += 1;
 
-                    if (numInRow == 3) {
+                    if (numInRow == 3)
+                    {
                         displayMedal2();
                         score.set(score.get() + 5);
                         numInRow = 0;
                     }
 
-                } else {
+                } else
+                {
                     numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
@@ -831,25 +901,30 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             b4.setOnClickListener((view) ->
             {
 
-                if (tickingSound.isPlaying()) {
+                if (tickingSound.isPlaying())
+                {
                     tickingSound.stop();
                     tickingSound.reset();
                 }
 
-                if (alarm.isPlaying()) {
+                if (alarm.isPlaying())
+                {
                     alarm.stop();
                     alarm.reset();
                 }
 
                 gameTimer.cancel();
-                gameTimer = new CountDownTimer(5000, 1000) {
+                gameTimer = new CountDownTimer(5000, 1000)
+                {
                     @Override
-                    public void onTick(long millisUntilFinished) {
+                    public void onTick(long millisUntilFinished)
+                    {
 
                     }
 
                     @Override
-                    public void onFinish() {
+                    public void onFinish()
+                    {
                         next.callOnClick();
                     }
                 }.start();
@@ -860,11 +935,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 b3.setEnabled(false);
                 b4.setEnabled(false);
 
-                if (b4.getTag() == "true") {
+                if (b4.getTag() == "true")
+                {
                     rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
-                    if (millisToAnswer < 2500) {
+                    if (millisToAnswer < 2500)
+                    {
                         score.set(score.get() + 10);
                         displayMedal4();
                     } else if (millisToAnswer < 6000)
@@ -880,12 +957,14 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     numInRow += 1;
                     numCorrect += 1;
 
-                    if (numInRow == 3) {
+                    if (numInRow == 3)
+                    {
                         displayMedal2();
                         score.set(score.get() + 5);
                         numInRow = 0;
                     }
-                } else {
+                } else
+                {
                     numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
@@ -914,7 +993,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         }
     }
 
-    public void leaveGame() {
+    public void leaveGame()
+    {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MultiplayerGame.this);
 
@@ -923,15 +1003,19 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         builder.setMessage("Are you sure you want to leave the game?");
 
         // Setting Negative "Cancel" Button
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int whichButton)
+            {
                 dialog.cancel();
             }
         });
 
         // Setting Positive "Yes" Button
-        builder.setPositiveButton("Leave", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+        builder.setPositiveButton("Leave", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int which)
+            {
                 tickingSound.stop();
                 gameTimer.cancel();
                 Intent menuActivity = new Intent(MultiplayerGame.this, MainMenu.class);
@@ -944,7 +1028,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         builder.show();
     }
 
-    public void displayMedal1() {
+    public void displayMedal1()
+    {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_1,
@@ -957,7 +1042,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     }
 
-    public void displayMedal2() {
+    public void displayMedal2()
+    {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_2,
@@ -970,7 +1056,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     }
 
-    public void displayMedal3() {
+    public void displayMedal3()
+    {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_3,
@@ -983,7 +1070,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     }
 
-    public void displayMedal4() {
+    public void displayMedal4()
+    {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_4,
@@ -996,7 +1084,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     }
 
-    public void displayMedal5() {
+    public void displayMedal5()
+    {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_5,
@@ -1010,55 +1099,67 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     private final PayloadCallback payloadCallback =
-            new PayloadCallback() {
+            new PayloadCallback()
+            {
                 @Override
-                public void onPayloadReceived(String endpointId, Payload payload) {
+                public void onPayloadReceived(String endpointId, Payload payload)
+                {
                     String receivedString = new String(payload.asBytes());
                     String lines[] = receivedString.split("\\r?\\n");
 
-                    switch (lines[0]) {
-                        case "QUIZ QUESTION": {
+                    switch (lines[0])
+                    {
+                        case "QUIZ QUESTION":
+                        {
                             //setupScreen(lines)
                             //run code to set up reg. MC question
                             break;
                         }
-                        case "QUIZ QUESTION TF": {
+                        case "QUIZ QUESTION TF":
+                        {
                             //setupScreenTF(lines)
                             //run code to set up TF question
                             break;
                         }
-                        case "DEBUFF": {
+                        case "DEBUFF":
+                        {
                             //takeDamage(lines)
                             //run code to debuff player based on what opponent sent
                             break;
                         }
-                        case "WAIT": {
+                        case "WAIT":
+                        {
                             //waitScreen()
                             //run code to setup debuff screen and wait for next question
                         }
-                        case "START TIMER": {
+                        case "START TIMER":
+                        {
                             //startTiming()
                             //run code to start timer
                             break;
                         }
-                        case "TIMER SUBMITTED": {
+                        case "TIMER SUBMITTED":
+                        {
                             //compareTimes(lines)
                             //run code to compare times, if host hasn't hit timer yet, by default opponent wins
                             break;
                         }
-                        case "END GAME": {
+                        case "END GAME":
+                        {
                             //gotoResults(lines)
                             // run code to load results screen
                             break;
                         }
-                        default: {
+                        default:
+                        {
                             Toast.makeText(getApplicationContext(), "Issue with payload", Toast.LENGTH_LONG);
                         }
                     }
                 }
 
                 @Override
-                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
+                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update)
+                {
 //                   update progress of incoming and outgoing payloads
                     //called when first byte is received, not whole payload !!!!
                 }
@@ -1066,23 +1167,28 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     // Callbacks for finding other devices
     private final EndpointDiscoveryCallback endpointDiscoveryCallback =
-            new EndpointDiscoveryCallback() {
+            new EndpointDiscoveryCallback()
+            {
                 @Override
-                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
+                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info)
+                {
                     Log.i(TAG, "onEndpointFound: endpoint found, connecting");
                     connectionsClient.requestConnection(userName, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override
-                public void onEndpointLost(String endpointId) {
+                public void onEndpointLost(String endpointId)
+                {
                 }
             };
 
     // Callbacks for connections to other devices
     private final ConnectionLifecycleCallback connectionLifecycleCallback =
-            new ConnectionLifecycleCallback() {
+            new ConnectionLifecycleCallback()
+            {
                 @Override
-                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo)
+                {
                     Log.i(TAG, "onConnectionInitiated: accepting connection");
                     connectionsClient.acceptConnection(endpointId, payloadCallback);
                     opponentName = connectionInfo.getEndpointName();
@@ -1090,8 +1196,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 }
 
                 @Override
-                public void onConnectionResult(String endpointId, ConnectionResolution result) {
-                    if (result.getStatus().isSuccess()) {
+                public void onConnectionResult(String endpointId, ConnectionResolution result)
+                {
+                    if (result.getStatus().isSuccess())
+                    {
                         Log.i(TAG, "onConnectionResult: connection successful");
 
                         connectionsClient.stopDiscovery();
@@ -1099,49 +1207,56 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         Toast.makeText(getApplicationContext(), "Connected to " + opponentName, Toast.LENGTH_LONG).show();
                         opponentEndpointId = endpointId;
                         setStatusText("Connected!");
-                    } else {
+                    } else
+                    {
                         Log.i(TAG, "onConnectionResult: connection failed");
                         Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG);
                     }
                 }
 
                 @Override
-                public void onDisconnected(String endpointId) {
+                public void onDisconnected(String endpointId)
+                {
                     Log.i(TAG, "onDisconnected: disconnected from the opponent");
                     resetGame();
                 }
             };
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         connectionsClient.stopAllEndpoints();
         resetGame();
 
         super.onStop();
     }
 
-    public void advertiseConnection(View view) {
+    public void advertiseConnection(View view)
+    {
 
         setStatusText("Searching....");
         isHost = true;
         startAdvertising();
     }
 
-    public void findConnection(View view) {
+    public void findConnection(View view)
+    {
 
         setStatusText("Searching....");
         isHost = false;
         startDiscovery();
     }
 
-    public void disconnect(View view) {
+    public void disconnect(View view)
+    {
         resetGame();
         setStatusText("DISCONNECTED FROM CONNECTION");
         findOpponentButton.setEnabled(true);
         discover.setEnabled(true);
     }
 
-    private void startDiscovery() {
+    private void startDiscovery()
+    {
         discover.setEnabled(false);
         findOpponentButton.setEnabled(false);
         DiscoveryOptions.Builder options = new DiscoveryOptions.Builder().setStrategy(STRATEGY);
@@ -1150,16 +1265,20 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 endpointDiscoveryCallback,
                 options.build())
                 .addOnSuccessListener(
-                        new OnSuccessListener<Void>() {
+                        new OnSuccessListener<Void>()
+                        {
                             @Override
-                            public void onSuccess(Void unusedResult) {
+                            public void onSuccess(Void unusedResult)
+                            {
                                 statusText.setText("DISCOVERING!");
                             }
                         })
                 .addOnFailureListener(
-                        new OnFailureListener() {
+                        new OnFailureListener()
+                        {
                             @Override
-                            public void onFailure(@NonNull Exception e) {
+                            public void onFailure(@NonNull Exception e)
+                            {
                                 statusText.setText("not DISCOVERING!");
                                 discover.setEnabled(true);
                                 findOpponentButton.setEnabled(true);
@@ -1168,7 +1287,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         });
     }
 
-    private void startAdvertising() {
+    private void startAdvertising()
+    {
         findOpponentButton.setEnabled(false);
         discover.setEnabled(false);
         AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
@@ -1179,16 +1299,20 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 options.build()
         )
                 .addOnSuccessListener(
-                        new OnSuccessListener<Void>() {
+                        new OnSuccessListener<Void>()
+                        {
                             @Override
-                            public void onSuccess(Void unusedResult) {// We're advertising!
+                            public void onSuccess(Void unusedResult)
+                            {// We're advertising!
                                 statusText.setText("Advertising");
                             }
                         })
                 .addOnFailureListener(
-                        new OnFailureListener() {
+                        new OnFailureListener()
+                        {
                             @Override
-                            public void onFailure(@NonNull Exception e) {
+                            public void onFailure(@NonNull Exception e)
+                            {
                                 // We were unable to start advertising.
                                 statusText.setText("Something went wrong with advertising");
                                 Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
@@ -1198,7 +1322,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         });
     }
 
-    private void resetGame() {
+    private void resetGame()
+    {
         opponentEndpointId = null;
         opponentName = null;
         opponentScore = 0;
@@ -1206,12 +1331,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         setStatusText("Disconnected");
     }
 
-    private void setStatusText(String text) {
+    private void setStatusText(String text)
+    {
         statusText.setText(text);
     }
 
-    private void sendQuizQuestion(int i) {
-        if (isHost) {
+    private void sendQuizQuestion(int i)
+    {
+        if (isHost)
+        {
             Payload chatPayload = Payload.fromBytes(quiz.get(i).toString().getBytes());
             Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
         }

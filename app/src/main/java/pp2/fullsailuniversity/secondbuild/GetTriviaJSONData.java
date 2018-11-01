@@ -11,7 +11,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion>> implements GetRawData.OnDownloadComplete {
+public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion>> implements GetRawData.OnDownloadComplete
+{
     private static final String TAG = "GetTriviaJSONData";
 
     private static List<QuizQuestion> mQuiz = null;
@@ -20,11 +21,13 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
 
     private final OnDataAvailable mCallBack;
 
-    interface OnDataAvailable {
+    interface OnDataAvailable
+    {
         void onDataAvailable(List<QuizQuestion> data, DownloadStatus status);
     }
 
-    public GetTriviaJSONData(OnDataAvailable callBack, String baseURL) {
+    public GetTriviaJSONData(OnDataAvailable callBack, String baseURL)
+    {
         Log.d(TAG, "GetTriviaJSONData called");
         mQuiz = new ArrayList<>();
         mBaseURL = baseURL;
@@ -32,7 +35,8 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
         Log.d(TAG, "GetTriviaJSONData: exiting");
     }
 
-    void executeOnSameThread(String searchCriteria) {
+    void executeOnSameThread(String searchCriteria)
+    {
         Log.d(TAG, "executeOnSameThread starts");
         runningOnSameThread = true;
         GetRawData getRawData = new GetRawData(this);
@@ -41,7 +45,8 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
     }
 
     @Override
-    protected List<QuizQuestion> doInBackground(String... strings) {
+    protected List<QuizQuestion> doInBackground(String... strings)
+    {
         Log.d(TAG, "doInBackground starts");
         GetRawData getRawData = new GetRawData(this);
         getRawData.execute(mBaseURL);
@@ -50,9 +55,11 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
     }
 
     @Override
-    protected void onPostExecute(List<QuizQuestion> quizQuestions) {
+    protected void onPostExecute(List<QuizQuestion> quizQuestions)
+    {
         Log.d(TAG, "onPostExecute: starts");
-        if (mCallBack != null) {
+        if (mCallBack != null)
+        {
             mCallBack.onDataAvailable(quizQuestions, DownloadStatus.OK);
             MainGameActivity.quiz = quizQuestions;
         }
@@ -60,16 +67,20 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
     }
 
     @Override
-    public void onDownloadComplete(String data, DownloadStatus status) {
+    public void onDownloadComplete(String data, DownloadStatus status)
+    {
         Log.d(TAG, "onDownloadComplete starts. Status = " + status);
 
-        if (status == DownloadStatus.OK) {
+        if (status == DownloadStatus.OK)
+        {
 
-            try {
+            try
+            {
                 JSONObject jsonData = new JSONObject(data);
                 JSONArray itemsArray = jsonData.getJSONArray("results");
 
-                for (int i = 0; i < itemsArray.length(); i++) {
+                for (int i = 0; i < itemsArray.length(); i++)
+                {
                     JSONObject jsonQuestion = itemsArray.getJSONObject(i);
                     String question = jsonQuestion.getString("question");
                     question = fromHTML(question);
@@ -79,13 +90,15 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
                     Answer ans2 = new Answer(incorrect_answers_array.get(0).toString(), false);
                     ans2.m_answer = fromHTML(ans2.m_answer);
                     QuizQuestion quizQuestion;
-                    if (jsonQuestion.getString("type").equals("boolean")) {
+                    if (jsonQuestion.getString("type").equals("boolean"))
+                    {
                         if (ans1.m_answer.equals("True"))
-                        quizQuestion = new QuizQuestion(question, true);
+                            quizQuestion = new QuizQuestion(question, true);
                         else
                             quizQuestion = new QuizQuestion(question, false);
                         quizQuestion.RandomizeQuestionOrder();
-                    } else {
+                    } else
+                    {
                         Answer ans3 = new Answer(incorrect_answers_array.get(1).toString(), false);
                         ans3.m_answer = fromHTML(ans3.m_answer);
                         Answer ans4 = new Answer(incorrect_answers_array.get(2).toString(), false);
@@ -98,14 +111,16 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
 
                     Log.d(TAG, "onDownloadComplete " + quizQuestion.questionString);
                 }
-            } catch (JSONException jsone) {
+            } catch (JSONException jsone)
+            {
                 jsone.printStackTrace();
                 Log.e(TAG, "onDownloadComplete: Error processing Json data " + jsone.getMessage());
                 status = DownloadStatus.FAILED_OR_EMPTY;
             }
         }
 
-        if (runningOnSameThread && mCallBack != null) {
+        if (runningOnSameThread && mCallBack != null)
+        {
             // now inform the caller that processing is done - possibly returning null if there was an error
             mCallBack.onDataAvailable(mQuiz, status);
         }
@@ -113,7 +128,8 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
         Log.d(TAG, "onDownloadComplete ends");
     }
 
-    private String fromHTML(String input) {
+    private String fromHTML(String input)
+    {
         return Html.fromHtml(input).toString();
     }
 }

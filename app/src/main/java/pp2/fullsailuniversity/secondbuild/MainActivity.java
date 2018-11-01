@@ -29,7 +29,8 @@ import com.google.android.gms.common.api.Status;
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener
+{
 
     private static final String TAG = "";
     private static int RC_SIGN_IN = 1001;
@@ -40,7 +41,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     //Sign in Flow Functions
 
-    private void startSignIn() {
+    private void startSignIn()
+    {
         //TODO Create sign-in intent and auth flow
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -48,12 +50,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-
-    private void signOut() {
+    private void signOut()
+    {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                .setResultCallback(new ResultCallback<Status>() {
+                .setResultCallback(new ResultCallback<Status>()
+                {
                     @Override
-                    public void onResult(@NonNull Status status) {
+                    public void onResult(@NonNull Status status)
+                    {
                         Toast.makeText(MainActivity.this, "You are signed out", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -62,7 +66,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
 
         super.onCreate(savedInstanceState);
 
@@ -75,8 +80,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
         // Sign in Listener
-        signIn.setOnClickListener(v -> {
-            switch (v.getId()) {
+        signIn.setOnClickListener(v ->
+        {
+            switch (v.getId())
+            {
                 case R.id.googleSignIn:
                     startSignIn();
                     break;
@@ -103,22 +110,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
         String check = getIntent().getStringExtra("thekey");
         Log.d(TAG, "onStart: -------------" + check);
 
-        if (requestCode == RC_SIGN_IN && check != "confirmed") {
+        if (requestCode == RC_SIGN_IN && check != "confirmed")
+        {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             signInResultHandler(result);
 
             updateUI(result);
-        }
-        else
+        } else
         {
             Log.d(TAG, "onStart: -------------" + check);
-            if (check == "confirmed"){
+            if (check == "confirmed")
+            {
 
                 signOut();
             }
@@ -126,28 +135,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-    private void signInResultHandler(GoogleSignInResult result) {
+    private void signInResultHandler(GoogleSignInResult result)
+    {
 
         Log.d(TAG, "signInResultHandler: SIGNIN RESULT CALLED");
-        if (result.isSuccess()) {
+        if (result.isSuccess())
+        {
 
             Log.d(TAG, "signInResultHandler: SIGNIN RESULT CALLED success = TRUE");
             GoogleSignInAccount account = result.getSignInAccount();
 
 
-        } else {
+        } else
+        {
             Status status = result.getStatus();
             int statusCode = status.getStatusCode();
             Log.d(TAG, "STATUS CODE: " + statusCode);
 
-            if (statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
+            if (statusCode == GoogleSignInStatusCodes.SIGN_IN_CANCELLED)
+            {
 
                 Log.d(TAG, "signInResultHandler: Sing in was cancelled");
             }
         }
     }
 
-    private void updateUI(GoogleSignInResult result) {
+    private void updateUI(GoogleSignInResult result)
+    {
 
         Intent goToMainMenu = new Intent(this, MainMenu.class);
         accToSend = result.getSignInAccount();
@@ -155,13 +169,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // Array data as follows
         //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
         String[] userData = new String[3];
-        if (accToSend != null) {
+        if (accToSend != null)
+        {
 
             userData[0] = accToSend.getDisplayName();
             userData[1] = accToSend.getEmail();
             if (accToSend.getPhotoUrl() != null)
                 userData[2] = accToSend.getPhotoUrl().toString();
-            else {
+            else
+            {
                 userData[2] = "DEFAULT IMAGE";
                 Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
             }
@@ -174,54 +190,58 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
         String check = getIntent().getStringExtra("thekey");
         Log.d(TAG, "onStart: -------------" + check);
 
-        if(check != null)
+        if (check != null)
         {
             flag = true;
         }
 
-       if(check == null && flag == false) {
-           Intent goToMainMenu = new Intent(this, MainMenu.class);
+        if (check == null && flag == false)
+        {
+            Intent goToMainMenu = new Intent(this, MainMenu.class);
 
 
-           GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-           // Array data as follows
-           //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
-           String[] userData = new String[3];
+            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+            // Array data as follows
+            //userData[0] = user name,  userData[1] = user email, userData[2] = user name photo url
+            String[] userData = new String[3];
 
 
-           if (account != null) {
+            if (account != null)
+            {
 
-               userData[0] = account.getDisplayName();
-               userData[1] = account.getEmail();
-               if (account.getPhotoUrl() != null)
-                   userData[2] = account.getPhotoUrl().toString();
-               else {
-                   userData[2] = "DEFAULT IMAGE";
-                   Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
-               }
+                userData[0] = account.getDisplayName();
+                userData[1] = account.getEmail();
+                if (account.getPhotoUrl() != null)
+                    userData[2] = account.getPhotoUrl().toString();
+                else
+                {
+                    userData[2] = "DEFAULT IMAGE";
+                    Log.d(TAG, "updateUI: NO USER IMAGE FOUND");
+                }
 
-               Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
-               goToMainMenu.putExtra("myKey", userData);
+                Log.d(TAG, "updateUI: " + userData[0] + " " + userData[1]);
+                goToMainMenu.putExtra("myKey", userData);
 
-               startActivity(goToMainMenu);
-           }
-       }
-       else {
-           Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show();
-       }
+                startActivity(goToMainMenu);
+            }
+        } else
+        {
+            Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show();
+        }
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
 
 
-
     }
 
-    public void loginHandlerB(View view) {
+    public void loginHandlerB(View view)
+    {
         Intent intent = new Intent(this, LoginActivity.class);
 
         startActivity(intent);
@@ -230,9 +250,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
-        if (mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient.isConnected())
+        {
             Log.d(TAG, " On stop Called. Disconnecting Google services");
 
             mGoogleApiClient.disconnect();
@@ -240,13 +262,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         Log.d(TAG, "onPause: Called");
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         Log.d(TAG, "onResume: Called");
 
@@ -254,7 +278,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    {
         Log.d(TAG, "onConnectionFailed: Connection Failed : ConnectionResult.getErrorCode() = " + connectionResult.getErrorCode());
     }
 

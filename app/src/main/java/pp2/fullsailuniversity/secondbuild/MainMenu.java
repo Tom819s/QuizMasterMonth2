@@ -34,7 +34,8 @@ import java.io.IOException;
 import java.util.Set;
 
 public class MainMenu extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.OnConnectionFailedListener
+{
 
     private static final String TAG = "Main Menu";
     private static final int REQ_CODE = 101;
@@ -45,7 +46,8 @@ public class MainMenu extends AppCompatActivity
     private MediaPlayer menuMusic;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
 
@@ -60,22 +62,27 @@ public class MainMenu extends AppCompatActivity
         lobby = findViewById(R.id.lobbyPB);
         lobby.setEnabled(false);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 Snackbar.make(view, "Stay Tuned For Upcoming Content", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
 
-        quickStart.setOnClickListener(new View.OnClickListener() {
+        quickStart.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
                 TriviaDBURLcreator triviaURL = new TriviaDBURLcreator();
                 triviaURL.mNumQuestions = 10;
                 triviaURL.mDifficulty = "ANYDIFF";
                 triviaURL.mCategory = "ANY";
-                try {
+                try
+                {
                     MainGameActivity.urlToAPI = triviaURL.createURL();
                     finish();
                     if (menuMusic.isPlaying())
@@ -86,16 +93,19 @@ public class MainMenu extends AppCompatActivity
                     goToGame.putExtra("myKey", 20);
                     startActivity(goToGame);
                     overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                     Log.d(TAG, "quickStart IOException");
                 }
             }
         });
 
-        multi.setOnClickListener(new View.OnClickListener() {
+        multi.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View view) {
+            public void onClick(View view)
+            {
 
                 if (menuMusic.isPlaying())
                     menuMusic.stop();
@@ -124,10 +134,11 @@ public class MainMenu extends AppCompatActivity
         String[] userData = intent.getStringArrayExtra("myKey");
 
 
-        if (userData != null) {
+        if (userData != null)
+        {
             Toast toast;
             if (userData[0] != null)
-            toast = Toast.makeText(getApplicationContext(), "Logged in as : " + userData[0], Toast.LENGTH_LONG);
+                toast = Toast.makeText(getApplicationContext(), "Logged in as : " + userData[0], Toast.LENGTH_LONG);
             else
                 toast = Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_LONG);
 
@@ -141,24 +152,29 @@ public class MainMenu extends AppCompatActivity
 
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START))
+        {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else
+        {
             super.onBackPressed();
         }
     }
 
     @Override
-    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+    public boolean onCreatePanelMenu(int featureId, Menu menu)
+    {
         //Setting user name and email values
         TextView userName = findViewById(R.id.UserName);
         TextView userEmail = findViewById(R.id.userEmail);
 
         //getting user info
         String[] userData = getIntent().getStringArrayExtra("myKey");
-        if (userData != null) {
+        if (userData != null)
+        {
             userDataInformation = new String[3];
             userDataInformation[0] = userData[0];
             userDataInformation[1] = userData[1];
@@ -176,7 +192,8 @@ public class MainMenu extends AppCompatActivity
             else
                 userPic.setImageResource(R.drawable.defaultuserimage);
 
-        } else {
+        } else
+        {
             userName.setText(userDataInformation[0]);
             userEmail.setText(userDataInformation[1]);
             ImageView userPic = findViewById(R.id.userPhoto);
@@ -192,14 +209,16 @@ public class MainMenu extends AppCompatActivity
 
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_settings)
+        {
             return true;
         }
 
@@ -209,19 +228,24 @@ public class MainMenu extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem item)
+    {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.gameBadges) {
+        if (id == R.id.gameBadges)
+        {
 
             // Handle achievement action
 
-        } else if (id == R.id.leaderBoard) {
+        } else if (id == R.id.leaderBoard)
+        {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_manage)
+        {
 
-        } else if (id == R.id.sing_out) {
+        } else if (id == R.id.sing_out)
+        {
 
             Intent intent = new Intent(this, MainActivity.class);
             String signout = "confirmed";
@@ -235,7 +259,8 @@ public class MainMenu extends AppCompatActivity
         return true;
     }
 
-    public void SoloButtonH(View view) {
+    public void SoloButtonH(View view)
+    {
 
         if (menuMusic.isPlaying())
             menuMusic.stop();
@@ -248,16 +273,19 @@ public class MainMenu extends AppCompatActivity
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
         if (menuMusic != null && menuMusic.isPlaying())
             menuMusic.stop();
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        if (menuMusic == null || !menuMusic.isPlaying()) {
+        if (menuMusic == null || !menuMusic.isPlaying())
+        {
             menuMusic = MediaPlayer.create(MainMenu.this, R.raw.menuloop);
             menuMusic.setLooping(true);
             menuMusic.start();
@@ -265,7 +293,8 @@ public class MainMenu extends AppCompatActivity
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
+    {
 
     }
 

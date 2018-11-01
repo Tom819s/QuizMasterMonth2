@@ -1,22 +1,27 @@
 package pp2.fullsailuniversity.secondbuild;
 
-public class TriviaDBURLcreator {
+public class TriviaDBURLcreator
+{
 
     public String mCategory, mDifficulty, mType;
     public int mNumQuestions;
 
-    public String createURL() throws java.io.IOException {
+    public String createURL() throws java.io.IOException
+    {
 
         int categoryAsInt;
         StringBuilder newURL = new StringBuilder();
         newURL.append("https://opentdb.com/api.php");
-        if (mNumQuestions > 9 && mNumQuestions <= 30) {
+        if (mNumQuestions > 9 && mNumQuestions <= 30)
+        {
             newURL.append("?amount=" + mNumQuestions);
         } else //by default gets 10 questions otherwise
             newURL.append("?amount=10");
 
-        if (mCategory != null) {
-            switch (mCategory) {
+        if (mCategory != null)
+        {
+            switch (mCategory)
+            {
                 case "General Knowledge":
                     categoryAsInt = 9;
                     break;
@@ -38,8 +43,10 @@ public class TriviaDBURLcreator {
         }
 
 
-        if (mDifficulty != null) {
-            switch (mDifficulty) {
+        if (mDifficulty != null)
+        {
+            switch (mDifficulty)
+            {
                 case "Easy":
                     newURL.append("&difficulty=easy");
                     break;
@@ -55,8 +62,10 @@ public class TriviaDBURLcreator {
             }
         }
 
-        if (mType != null) {
-            switch (mType) {
+        if (mType != null)
+        {
+            switch (mType)
+            {
                 case "boolean":
                     newURL.append("&type=boolean");
                     break;

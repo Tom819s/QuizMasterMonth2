@@ -16,7 +16,8 @@ import android.widget.Switch;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GameSetup extends AppCompatActivity {
+public class GameSetup extends AppCompatActivity
+{
     private TriviaDBURLcreator triviaURL;
     private RadioGroup categoriesRadio, difficultiesRadio, typeRadio;
     private NumberPicker numpicker, timepicker;
@@ -25,12 +26,14 @@ public class GameSetup extends AppCompatActivity {
 
     private static final String TAG = "GameSetup";
 
-    public GameSetup() {
+    public GameSetup()
+    {
         triviaURL = new TriviaDBURLcreator();
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_game_setup);
@@ -80,7 +83,8 @@ public class GameSetup extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
 
         Intent results = new Intent(this, MainMenu.class);
         finish();
@@ -89,24 +93,29 @@ public class GameSetup extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
         if (menuMusic.isPlaying())
             menuMusic.stop();
     }
 
     @Override
-    protected void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        if (!menuMusic.isPlaying()) {
+        if (!menuMusic.isPlaying())
+        {
             menuMusic = MediaPlayer.create(GameSetup.this, R.raw.menuloop);
             menuMusic.setLooping(true);
             menuMusic.start();
         }
     }
 
-    public void playButtonHandler(View view) {
-        try {
+    public void playButtonHandler(View view)
+    {
+        try
+        {
             int catID = categoriesRadio.getCheckedRadioButtonId();
             triviaURL.mCategory = findViewById(catID).getTag().toString();
             int typeID = typeRadio.getCheckedRadioButtonId();
@@ -115,7 +124,8 @@ public class GameSetup extends AppCompatActivity {
             triviaURL.mDifficulty = findViewById(diffID).getTag().toString();
             triviaURL.mNumQuestions = numpicker.getValue();
             MainGameActivity.urlToAPI = triviaURL.createURL();
-        } catch (java.io.IOException e) {
+        } catch (java.io.IOException e)
+        {
             e.printStackTrace();
             Log.d(TAG, "playButtonHandler: io exception creating url");
         }
