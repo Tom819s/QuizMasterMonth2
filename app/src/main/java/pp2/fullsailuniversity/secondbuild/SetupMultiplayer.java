@@ -53,7 +53,6 @@ import org.w3c.dom.Text;
 
 import java.util.Random;
 
-/** Activity controlling the Rock Paper Scissors game */
 public class SetupMultiplayer extends AppCompatActivity {
 
     private static final String TAG = "SetupMultiplayer", SERVICE_ID = "TRIVIAMASTERYAPP";
@@ -113,7 +112,7 @@ public class SetupMultiplayer extends AppCompatActivity {
                 @Override
                 public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
                     Log.i(TAG, "onEndpointFound: endpoint found, connecting");
-                    connectionsClient.requestConnection(codeName, endpointId, connectionLifecycleCallback);
+                    connectionsClient.requestConnection(userName, endpointId, connectionLifecycleCallback);
                 }
 
                 @Override

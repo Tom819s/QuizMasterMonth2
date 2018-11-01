@@ -6,11 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -24,25 +27,96 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputEditText;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.util.SimpleArrayMap;
+import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.method.ScrollingMovementMethod;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.connection.AdvertisingOptions;
+import com.google.android.gms.nearby.connection.ConnectionInfo;
+import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback;
+import com.google.android.gms.nearby.connection.ConnectionResolution;
+import com.google.android.gms.nearby.connection.ConnectionsClient;
+import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo;
+import com.google.android.gms.nearby.connection.DiscoveryOptions;
+import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
+import com.google.android.gms.nearby.connection.Payload;
+import com.google.android.gms.nearby.connection.PayloadCallback;
+import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
+import com.google.android.gms.nearby.connection.PayloadTransferUpdate.Status;
+import com.google.android.gms.nearby.connection.Strategy;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 
 public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable {
     private static final String TAG = "MainActivityGame";
 
 
+    private ConnectionsClient connectionsClient;
+
+    // Our randomly generated name
+    private final static String SERVICE_ID = "TRIVIAMASTERYAPP";
+
+    private String opponentEndpointId;
+    private String opponentName, userName;
+    private int opponentScore;
+
+    private Button findOpponentButton, disconnectButton, testMedal, sendChat, discover;
+    private TextView opponentText;
+    private TextView statusText;
+    private TextView scoreText;
+    private TextView chatText;
+    private EditText chatInput;
+
+    private static final Strategy STRATEGY = Strategy.P2P_STAR;
     public static List<QuizQuestion> quiz;
     public static AtomicInteger i, score;
     public static String urlToAPI;
-    private long millisToAnswer;
+    public static int gameTime;
+
+    private long millisToAnswer, timeLeft, moveonLeft;
     private TextView question;
     private TextView timerText;
-    private TextView scorecounter;
+    private TextView scorecounter, questioncounter;
+    public static boolean hints, isHost;
+    private int numCorrect, numInRow, numQuestions;
+    private boolean previouscorrect, hasStopped;
     private Button next,
             exit,
             b1, b2, b3, b4;
+    private CountDownTimer gameTimer, timesup;
     private ImageButton startbtn;
-    private CountDownTimer gameTimer, timesup, answerTimer;
-    private MediaPlayer correctSound, wrongSound, tickingSound, alarm;
+    private MediaPlayer correctSound, wrongSound, tickingSound, alarm, loopingElectro;
 
 
     @Override
@@ -51,14 +125,22 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_game);
 
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        userName = wm.getConnectionInfo().getMacAddress();
+        hasStopped = false;
         i = new AtomicInteger();
         score = new AtomicInteger(0);
+
+        Bundle bundle = getIntent().getExtras();
+        gameTime = (bundle.getInt("myKey") * 1000) + 1000;
+        Log.d(TAG, "onCreate: gametime" + gameTime);
 
         ProgressBar pbar = findViewById(R.id.progressBar);
         b1 = findViewById(R.id.button1);
         b2 = findViewById(R.id.button2);
         b3 = findViewById(R.id.button3);
         b4 = findViewById(R.id.button4);
+        questioncounter = findViewById(R.id.questionNumber);
         scorecounter = findViewById(R.id.score);
         question = findViewById(R.id.userEmail);
         next = findViewById(R.id.nextB);
@@ -68,11 +150,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 
         correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
-        wrongSound = MediaPlayer.create(MultiplayerGame.this, R.raw.wrong);
+        loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
+        wrongSound = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
         tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
-
-        scorecounter.setText("0");
+        loopingElectro.setLooping(true);
+        loopingElectro.start();
+        scorecounter.setText("Score: 0");
         timerText.setText(" ");
         question.setText("");
         next.setEnabled(false);
@@ -124,7 +208,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
         exit.setOnClickListener((view) ->
         {
+            if (loopingElectro.isPlaying())
+                loopingElectro.stop();
             leaveGame();
+
         });
 
         Log.d(TAG, "onCreate: ends");
@@ -134,74 +221,69 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     @Override
     public void onBackPressed() {
 
+        if (loopingElectro.isPlaying())
+            loopingElectro.stop();
+        if (gameTimer != null)
+            gameTimer.cancel();
+        if (timesup != null)
+            timesup.cancel();
         leaveGame();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        hasStopped = true;
+        if (loopingElectro.isPlaying())
+            loopingElectro.stop();
+        if (tickingSound.isPlaying())
+            tickingSound.stop();
+        if (alarm.isPlaying())
+            alarm.stop();
+        if (gameTimer != null)
+            gameTimer.cancel();
+        if (timesup != null)
+            timesup.cancel();
     }
 
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume starts");
         super.onResume();
-        Log.d(TAG, "onResume ends");
-    }
 
-    @Override
-    public void onDataAvailable(List<QuizQuestion> data, DownloadStatus status) {
-        if (status == DownloadStatus.OK) {
-            Log.d(TAG, "onDataAvailable: data is " + data);
-            quiz = data;
-        } else {
-            // download or processing failed
-            Log.e(TAG, "onDataAvailable failed with status " + status);
-        }
-    }
-
-    public void GameLoop(int index) {
-
-
-        if (tickingSound.isPlaying()) {
-            tickingSound.stop();
-        }
-
-        if (alarm.isPlaying()) {
-            alarm.stop();
-        }
-
-        gameTimer.cancel();
-
-        if (quiz != null && index < quiz.size()) {
-            tickingSound.stop();
-            tickingSound.release();
+        if (hasStopped) {
+            if (!loopingElectro.isPlaying()) {
+                loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
+                loopingElectro.setLooping(true);
+                loopingElectro.start();
+            }
             tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
+            alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
+            correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
+            wrongSound = MediaPlayer.create(MultiplayerGame.this, R.raw.wrong);
 
-            List<Button> buttons = new ArrayList<Button>();
-            buttons.add(b1);
-            buttons.add(b2);
-            buttons.add(b3);
-            buttons.add(b4);
-
-
-            gameTimer = new CountDownTimer(21000, 1000) {
+            gameTimer = new CountDownTimer(timeLeft, 1000) {
 
                 public void onTick(long millisUntilFinished) {
+
                     String count = Long.toString(millisUntilFinished / 1000);
-                    millisToAnswer = 21000 - millisUntilFinished;
-                    if (millisUntilFinished / 1000 > 10) {
+                    millisToAnswer = gameTime - millisUntilFinished;
+                    timeLeft = millisUntilFinished;
+                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
-                    } else if (millisUntilFinished / 1000 > 5) {
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
                         timerText.setTextColor(Color.rgb(255, 204, 0));
                     } else {
                         if (!tickingSound.isPlaying()) {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
-                            buttons.get(0).setEnabled(false);
-                            buttons.get(1).setEnabled(false);
                         }
                         timerText.setTextColor(Color.rgb(204, 0, 0));
                     }
                     timerText.setText(count);
                 }
 
-                public void onFinish () {
+                public void onFinish() {
                     tickingSound.stop();
                     alarm.setVolume(5.0f, 5.0f);
                     alarm.start();
@@ -221,12 +303,119 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     else if (b4.getTag() == "true")
                         b4.setBackgroundColor(Color.GREEN);
 
-                    scorecounter.setText(score.toString());
+                    scorecounter.setText("Score: " + score.toString());
+
+                    timesup = new CountDownTimer(moveonLeft, 1000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            moveonLeft = millisUntilFinished;
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            next.callOnClick();
+                        }
+                    }.start();
+
+                }
+
+            }.start();
+        }
+        moveonLeft = 5000;
+        Log.d(TAG, "onResume ends");
+    }
+
+    @Override
+    public void onDataAvailable(List<QuizQuestion> data, DownloadStatus status) {
+        if (status == DownloadStatus.OK) {
+            Log.d(TAG, "onDataAvailable: data is " + data);
+            quiz = data;
+        } else {
+            // download or processing failed
+            Log.e(TAG, "onDataAvailable failed with status " + status);
+        }
+    }
+
+    public void GameLoop(int index) {
+
+        timeLeft = 0;
+        moveonLeft = 0;
+        if (tickingSound.isPlaying()) {
+            tickingSound.stop();
+        }
+
+        if (alarm.isPlaying()) {
+            alarm.stop();
+        }
+
+        if (timesup != null)
+            timesup.cancel();
+        gameTimer.cancel();
+
+        if (quiz != null && index < quiz.size()) {
+            tickingSound.stop();
+            tickingSound.release();
+            tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
+
+            List<Button> buttons = new ArrayList<Button>();
+            buttons.add(b1);
+            buttons.add(b2);
+            buttons.add(b3);
+            buttons.add(b4);
+
+            numQuestions = quiz.size();
+            questioncounter.setText("Question: " + (index + 1) + " / " + numQuestions);
+            gameTimer = new CountDownTimer(gameTime, 1000) {
+
+                public void onTick(long millisUntilFinished) {
+
+                    String count = Long.toString(millisUntilFinished / 1000);
+                    millisToAnswer = gameTime - millisUntilFinished;
+                    timeLeft = millisUntilFinished;
+                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
+                        timerText.setTextColor(Color.rgb(0, 204, 0));
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
+                        timerText.setTextColor(Color.rgb(255, 204, 0));
+                    } else {
+                        if (!tickingSound.isPlaying()) {
+                            tickingSound.setVolume(5.0f, 5.0f);
+                            tickingSound.start();
+                            if (hints) {
+                                buttons.get(0).setEnabled(false);
+                                buttons.get(1).setEnabled(false);
+                            }
+                        }
+                        timerText.setTextColor(Color.rgb(204, 0, 0));
+                    }
+                    timerText.setText(count);
+                }
+
+                public void onFinish() {
+                    tickingSound.stop();
+                    alarm.setVolume(5.0f, 5.0f);
+                    alarm.start();
+                    timerText.setText("Time's Up!");
+                    b1.setEnabled(false);
+                    b2.setEnabled(false);
+                    b3.setEnabled(false);
+                    b4.setEnabled(false);
+                    next.setEnabled(true);
+
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
+
+                    scorecounter.setText("Score: " + score.toString());
 
                     timesup = new CountDownTimer(5000, 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
-
+                            moveonLeft = millisUntilFinished;
                         }
 
                         @Override
@@ -274,28 +463,28 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             b4.setText(quiz.get(index).answers[3].m_answer);
 
 
-            if(quiz.get(index).answers[0].isCorrect)
+            if (quiz.get(index).answers[0].isCorrect)
 
             {
                 b1.setTag("true");
             } else
                 b1.setTag("false");
 
-            if(quiz.get(index).answers[1].isCorrect)
+            if (quiz.get(index).answers[1].isCorrect)
 
             {
                 b2.setTag("true");
             } else
                 b2.setTag("false");
 
-            if(quiz.get(index).answers[2].isCorrect)
+            if (quiz.get(index).answers[2].isCorrect)
 
             {
                 b3.setTag("true");
             } else
                 b3.setTag("false");
 
-            if(quiz.get(index).answers[3].isCorrect)
+            if (quiz.get(index).answers[3].isCorrect)
 
             {
                 b4.setTag("true");
@@ -313,7 +502,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             buttons.remove(randomIndex);
 
 // set string values for the questions
-            next.setOnClickListener((view)->
+            next.setOnClickListener((view) ->
 
                     {
                         gameTimer.cancel();
@@ -326,11 +515,12 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             GameLoop(i.get()); //call game loop with new index value
                         } else {
                             i.set(quiz.size());
-                            int[] gameResults = new int[2];
+                            Intent results = new Intent(MultiplayerGame.this, Results.class);
+                            int[] gameResults = new int[3];
                             gameResults[0] = i.get();
                             gameResults[1] = score.get();
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
-                            results.putExtra("myKey", gameResults);
+                            gameResults[2] = (gameTime - 1000) / 1000;
+                            results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);
                             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
@@ -340,8 +530,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             );
 
 
+            //exit App
+
             //next button functionality
-            b1.setOnClickListener((view)->
+            b1.setOnClickListener((view) ->
 
             {
                 if (tickingSound.isPlaying()) {
@@ -376,7 +568,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
                     correctSound.start();
-                    if (millisToAnswer < 6000)
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
                         score.set(score.get() + 5);
                     else if (millisToAnswer < 10000)
                         score.set(score.get() + 3);
@@ -386,21 +581,24 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//                    correctSound.start();
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
-                } else {
+                    numInRow += 1;
+                    numCorrect += 1;
 
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
+                        numInRow = 0;
+                    }
+                } else {
+                    numInRow = 0;
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
 
+                    wrongSound.reset();
                     wrongSound.start();
                     timerText.setText("Wrong!");
-                    timerText.setTextColor(Color.rgb(255,0,0));
+                    timerText.setTextColor(Color.rgb(255, 0, 0));
                     b1.setBackgroundColor(Color.RED);
                     if (b2.getTag() == "true")
                         b2.setBackgroundColor(Color.GREEN);
@@ -415,11 +613,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 //                    toast.show();
                 }
 
-                scorecounter.setText(score.toString());
+                scorecounter.setText("Score: " + score.toString());
             });
 
 
-            b2.setOnClickListener((view)->
+            b2.setOnClickListener((view) ->
 
             {
 
@@ -457,7 +655,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     correctSound.start();
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
-                    if (millisToAnswer < 6000)
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
                         score.set(score.get() + 5);
                     else if (millisToAnswer < 10000)
                         score.set(score.get() + 3);
@@ -467,21 +668,25 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.GREEN);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
-                } else {
+                    numInRow += 1;
+                    numCorrect += 1;
 
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
+                        numInRow = 0;
+                    }
+
+                } else {
+                    numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
+                    wrongSound.reset();
                     wrongSound.start();
                     timerText.setText("Wrong!");
-                    timerText.setTextColor(Color.rgb(255,0,0));
+                    timerText.setTextColor(Color.rgb(255, 0, 0));
 
                     if (b1.getTag() == "true")
                         b1.setBackgroundColor(Color.GREEN);
@@ -498,11 +703,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                 }
-                scorecounter.setText(score.toString());
+                scorecounter.setText("Score: " + score.toString());
             });
 
 
-            b3.setOnClickListener((view)->
+            b3.setOnClickListener((view) ->
 
             {
                 if (tickingSound.isPlaying()) {
@@ -536,7 +741,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
                 if (b3.getTag() == "true") {
                     correctSound.start();
-                    if (millisToAnswer < 6000)
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
                         score.set(score.get() + 5);
                     else if (millisToAnswer < 10000)
                         score.set(score.get() + 3);
@@ -549,17 +757,22 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.GREEN);
                     b4.setBackgroundColor(Color.LTGRAY);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
+                    numInRow += 1;
+                    numCorrect += 1;
+
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
+                        numInRow = 0;
+                    }
+
                 } else {
+                    numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.LTGRAY);
+                    wrongSound.reset();
                     wrongSound.start();
                     if (b1.getTag() == "true")
                         b1.setBackgroundColor(Color.GREEN);
@@ -578,10 +791,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                 }
-                scorecounter.setText(score.toString());
+                scorecounter.setText("Score: " + score.toString());
             });
 
-            b4.setOnClickListener((view)->
+            b4.setOnClickListener((view) ->
             {
 
                 if (tickingSound.isPlaying()) {
@@ -617,7 +830,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     correctSound.start();
                     timerText.setText("Correct!");
                     timerText.setTextColor(Color.GREEN);
-                    if (millisToAnswer < 6000)
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
                         score.set(score.get() + 5);
                     else if (millisToAnswer < 10000)
                         score.set(score.get() + 3);
@@ -627,13 +843,16 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
                     b4.setBackgroundColor(Color.GREEN);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Correct!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
+                    numInRow += 1;
+                    numCorrect += 1;
+
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
+                        numInRow = 0;
+                    }
                 } else {
+                    numInRow = 0;
                     b1.setBackgroundColor(Color.LTGRAY);
                     b2.setBackgroundColor(Color.LTGRAY);
                     b3.setBackgroundColor(Color.LTGRAY);
@@ -656,13 +875,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
                 }
-                scorecounter.setText(score.toString());
+                scorecounter.setText("Score: " + score.toString());
 
             });
         }
     }
 
-    public void leaveGame () {
+    public void leaveGame() {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MultiplayerGame.this);
 
@@ -692,4 +911,256 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         builder.show();
     }
 
+    public void displayMedal1() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_1,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    public void displayMedal2() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_2,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    public void displayMedal3() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_3,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    public void displayMedal4() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_4,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    public void displayMedal5() {
+
+        LayoutInflater toastInflater = getLayoutInflater();
+        View view = toastInflater.inflate(R.layout.medal_5,
+                findViewById(R.id.relativeLayout1));
+        Toast toast = new Toast(this);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setView(view);
+        toast.show();
+
+
+    }
+
+    private final PayloadCallback payloadCallback =
+            new PayloadCallback() {
+                @Override
+                public void onPayloadReceived(String endpointId, Payload payload) {
+                    String receivedString = new String(payload.asBytes());
+                    String lines[] = receivedString.split("\\r?\\n");
+
+                    switch(lines[0]){
+                        case "QUIZ QUESTION":{ //sent payload of quiz question must populate views
+
+                            break;
+                        }
+                        case "TIMER":{
+
+                            break;
+                        }
+                        case "END GAME":{
+
+                            break;
+                        }
+                        default:{
+                            Toast.makeText(getApplicationContext(),"Issue with payload", Toast.LENGTH_LONG);
+                        }
+                    }
+                }
+
+                @Override
+                public void onPayloadTransferUpdate(String endpointId, PayloadTransferUpdate update) {
+//                   update progress of incoming and outgoing payloads
+                    //called when first byte is received, not whole payload !!!!
+                }
+            };
+
+    // Callbacks for finding other devices
+    private final EndpointDiscoveryCallback endpointDiscoveryCallback =
+            new EndpointDiscoveryCallback() {
+                @Override
+                public void onEndpointFound(String endpointId, DiscoveredEndpointInfo info) {
+                    Log.i(TAG, "onEndpointFound: endpoint found, connecting");
+                    connectionsClient.requestConnection(userName, endpointId, connectionLifecycleCallback);
+                }
+
+                @Override
+                public void onEndpointLost(String endpointId) {
+                }
+            };
+
+    // Callbacks for connections to other devices
+    private final ConnectionLifecycleCallback connectionLifecycleCallback =
+            new ConnectionLifecycleCallback() {
+                @Override
+                public void onConnectionInitiated(String endpointId, ConnectionInfo connectionInfo) {
+                    Log.i(TAG, "onConnectionInitiated: accepting connection");
+                    connectionsClient.acceptConnection(endpointId, payloadCallback);
+                    opponentName = connectionInfo.getEndpointName();
+
+                }
+
+                @Override
+                public void onConnectionResult(String endpointId, ConnectionResolution result) {
+                    if (result.getStatus().isSuccess()) {
+                        Log.i(TAG, "onConnectionResult: connection successful");
+
+                        connectionsClient.stopDiscovery();
+                        connectionsClient.stopAdvertising();
+                        Toast.makeText(getApplicationContext(), "Connected to " + opponentName, Toast.LENGTH_LONG).show();
+                        opponentEndpointId = endpointId;
+                        setStatusText("Connected!");
+                    } else {
+                        Log.i(TAG, "onConnectionResult: connection failed");
+                        Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG);
+                    }
+                }
+
+                @Override
+                public void onDisconnected(String endpointId) {
+                    Log.i(TAG, "onDisconnected: disconnected from the opponent");
+                    resetGame();
+                }
+            };
+
+    @Override
+    protected void onStop() {
+        connectionsClient.stopAllEndpoints();
+        resetGame();
+
+        super.onStop();
+    }
+
+    public void advertiseConnection(View view) {
+
+        setStatusText("Searching....");
+        isHost = true;
+        startAdvertising();
+    }
+
+    public void findConnection(View view) {
+
+        setStatusText("Searching....");
+        isHost = false;
+        startDiscovery();
+    }
+
+    public void disconnect(View view) {
+        resetGame();
+        setStatusText("DISCONNECTED FROM CONNECTION");
+        findOpponentButton.setEnabled(true);
+        discover.setEnabled(true);
+    }
+
+    private void startDiscovery() {
+        discover.setEnabled(false);
+        findOpponentButton.setEnabled(false);
+        DiscoveryOptions.Builder options = new DiscoveryOptions.Builder().setStrategy(STRATEGY);
+        Nearby.getConnectionsClient(getApplicationContext()).startDiscovery(
+                SERVICE_ID,
+                endpointDiscoveryCallback,
+                options.build())
+                .addOnSuccessListener(
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unusedResult) {
+                                statusText.setText("DISCOVERING!");
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                statusText.setText("not DISCOVERING!");
+                                discover.setEnabled(true);
+                                findOpponentButton.setEnabled(true);
+                                Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
+                            }
+                        });
+    }
+
+    private void startAdvertising() {
+        findOpponentButton.setEnabled(false);
+        discover.setEnabled(false);
+        AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
+        Nearby.getConnectionsClient(getApplicationContext()).startAdvertising(
+                userName,
+                SERVICE_ID,
+                connectionLifecycleCallback,
+                options.build()
+        )
+                .addOnSuccessListener(
+                        new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unusedResult) {// We're advertising!
+                                statusText.setText("Advertising");
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // We were unable to start advertising.
+                                statusText.setText("Something went wrong with advertising");
+                                Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
+                                findOpponentButton.setEnabled(true);
+                                discover.setEnabled(true);
+                            }
+                        });
+    }
+
+    private void resetGame() {
+        opponentEndpointId = null;
+        opponentName = null;
+        opponentScore = 0;
+
+        setStatusText("Disconnected");
+    }
+
+    private void setStatusText(String text) {
+        statusText.setText(text);
+    }
+
+    private void sendQuizQuestion(int i){
+        if (isHost){
+            Payload chatPayload = Payload.fromBytes(quiz.get(i).toString().getBytes());
+            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+        }
+    }
 }
+
+

@@ -1,6 +1,8 @@
 package pp2.fullsailuniversity.secondbuild;
 
-public class QuizQuestion {
+import java.io.Serializable;
+
+public class QuizQuestion implements Serializable {
     String questionString;
     Answer[] answers;
 
@@ -13,6 +15,14 @@ public class QuizQuestion {
         answers[3] = ans4;
     }
 
+    @Override
+    public String toString() {
+        String quizString = new String();
+        quizString = "QUIZ QUESTION\n";
+        quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n' + answers[2] + '\n' + answers[3] + '\n' + whichIsRight();
+        return quizString;
+    }
+
     public void RandomizeQuestionOrder() {
         //using a simplified fischer-yates algorithm to swap answers randomly
         //this is used because otherwise the first answer would always be correct due to how the API sends data to the app
@@ -22,6 +32,16 @@ public class QuizQuestion {
             answers[i] = answers[j];
             answers[j] = temp;
         }
+    }
+
+    private int whichIsRight(){
+        int isRight = 5;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (answers[i].isCorrect)
+            isRight = i;
+        }
+        return isRight;
     }
 
 }
