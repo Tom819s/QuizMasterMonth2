@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameSetup extends AppCompatActivity {
     private TriviaDBURLcreator triviaURL;
-    private RadioGroup categoriesRadio, difficultiesRadio;
+    private RadioGroup categoriesRadio, difficultiesRadio, typeRadio;
     private NumberPicker numpicker, timepicker;
     private Switch hintsOn;
     private MediaPlayer menuMusic;
@@ -37,6 +37,7 @@ public class GameSetup extends AppCompatActivity {
         menuMusic = MediaPlayer.create(GameSetup.this, R.raw.menuloop);
         categoriesRadio = findViewById(R.id.radioGroupCategory);
         difficultiesRadio = findViewById(R.id.radioGroupDifficulty);
+        typeRadio = findViewById(R.id.radioGroupType);
         numpicker = findViewById(R.id.numQuestionPicker);
         numpicker.setMinValue(10);
         numpicker.setMaxValue(30);
@@ -69,6 +70,13 @@ public class GameSetup extends AppCompatActivity {
         diffHard.setTag("Hard");
         RadioButton diffAll = findViewById(R.id.radioAnyDif);
         diffAll.setTag("ANY");
+
+        RadioButton typeAll = findViewById(R.id.wantBoth);
+        typeAll.setTag("");
+        RadioButton typeMC = findViewById(R.id.wantMC);
+        typeMC.setTag("multiple");
+        RadioButton typeTF = findViewById(R.id.wantTF);
+        typeTF.setTag("boolean");
     }
 
     @Override
@@ -99,6 +107,8 @@ public class GameSetup extends AppCompatActivity {
         try {
             int catID = categoriesRadio.getCheckedRadioButtonId();
             triviaURL.mCategory = findViewById(catID).getTag().toString();
+            int typeID = typeRadio.getCheckedRadioButtonId();
+            triviaURL.mType = findViewById(typeID).getTag().toString();
             int diffID = difficultiesRadio.getCheckedRadioButtonId();
             triviaURL.mDifficulty = findViewById(diffID).getTag().toString();
             triviaURL.mNumQuestions = numpicker.getValue();

@@ -78,13 +78,22 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
                     ans1.m_answer = fromHTML(ans1.m_answer);
                     Answer ans2 = new Answer(incorrect_answers_array.get(0).toString(), false);
                     ans2.m_answer = fromHTML(ans2.m_answer);
-                    Answer ans3 = new Answer(incorrect_answers_array.get(1).toString(), false);
-                    ans3.m_answer = fromHTML(ans3.m_answer);
-                    Answer ans4 = new Answer(incorrect_answers_array.get(2).toString(), false);
-                    ans4.m_answer = fromHTML(ans4.m_answer);
+                    QuizQuestion quizQuestion;
+                    if (jsonQuestion.getString("type").equals("boolean")) {
+                        if (ans1.m_answer.equals("True"))
+                        quizQuestion = new QuizQuestion(question, true);
+                        else
+                            quizQuestion = new QuizQuestion(question, false);
+                        quizQuestion.RandomizeQuestionOrder();
+                    } else {
+                        Answer ans3 = new Answer(incorrect_answers_array.get(1).toString(), false);
+                        ans3.m_answer = fromHTML(ans3.m_answer);
+                        Answer ans4 = new Answer(incorrect_answers_array.get(2).toString(), false);
+                        ans4.m_answer = fromHTML(ans4.m_answer);
 
-                    QuizQuestion quizQuestion = new QuizQuestion(question, ans1, ans2, ans3, ans4);
-                    quizQuestion.RandomizeQuestionOrder();
+                        quizQuestion = new QuizQuestion(question, ans1, ans2, ans3, ans4);
+                        quizQuestion.RandomizeQuestionOrder();
+                    }
                     mQuiz.add(quizQuestion);
 
                     Log.d(TAG, "onDownloadComplete " + quizQuestion.questionString);

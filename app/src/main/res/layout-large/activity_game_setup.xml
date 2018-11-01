@@ -32,14 +32,14 @@
         android:layout_width="88dp"
         android:layout_height="34dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="508dp"
+        android:layout_marginTop="408dp"
         android:layout_marginEnd="8dp"
         android:text="Difficulty"
         android:textAlignment="center"
         android:textColor="@color/common_google_signin_btn_text_dark_focused"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.266"
+        app:layout_constraintHorizontal_bias="0.291"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -48,7 +48,7 @@
         android:layout_width="141dp"
         android:layout_height="38dp"
         android:layout_marginStart="140dp"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="172dp"
         android:layout_marginEnd="8dp"
         android:gravity="center"
         android:text="@string/categories"
@@ -61,8 +61,8 @@
 
     <RadioGroup
         android:id="@+id/radioGroupCategory"
-        android:layout_width="232dp"
-        android:layout_height="223dp"
+        android:layout_width="182dp"
+        android:layout_height="165dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="8dp"
@@ -129,16 +129,16 @@
         android:scaleType="centerInside"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.789"
+        app:layout_constraintHorizontal_bias="0.882"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.993"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/startbutton_green" />
 
     <RadioGroup
         android:id="@+id/radioGroupDifficulty"
-        android:layout_width="190dp"
-        android:layout_height="156dp"
+        android:layout_width="169dp"
+        android:layout_height="97dp"
         android:layout_marginTop="32dp"
         android:checkedButton="@+id/radioAnyDif"
         app:layout_constraintEnd_toEndOf="@+id/textView4"
@@ -208,8 +208,8 @@
         android:layout_height="78dp"
         android:layout_marginTop="36dp"
         android:clickable="false"
-        android:focusable="false"
         android:fadeScrollbars="true"
+        android:focusable="false"
         android:scrollbarAlwaysDrawHorizontalTrack="false"
         android:scrollbarAlwaysDrawVerticalTrack="false"
         app:layout_constraintEnd_toEndOf="@+id/textView9"
@@ -291,5 +291,60 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/blackboarder" />
+
+    <TextView
+        android:id="@+id/textview3"
+        android:layout_width="88dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="608dp"
+        android:layout_marginEnd="8dp"
+        android:layout_weight="1"
+        android:text="Type"
+        android:textAlignment="center"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.265"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupType"
+        android:layout_width="162dp"
+        android:layout_height="93dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginBottom="8dp"
+        android:checkedButton="@+id/wantBoth"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/textview3"
+        app:layout_constraintHorizontal_bias="0.508"
+        app:layout_constraintStart_toStartOf="@+id/textview3"
+        app:layout_constraintTop_toBottomOf="@+id/textview3"
+        app:layout_constraintVertical_bias="0.0">
+
+        <RadioButton
+            android:id="@+id/wantTF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="True/False"
+            tools:layout_editor_absoluteX="44dp"
+            tools:layout_editor_absoluteY="730dp" />
+
+        <RadioButton
+            android:id="@+id/wantMC"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multiple Choice"
+            tools:layout_editor_absoluteX="92dp"
+            tools:layout_editor_absoluteY="756dp" />
+
+        <RadioButton
+            android:id="@+id/wantBoth"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Both" />
+    </RadioGroup>
 
 </android.support.constraint.ConstraintLayout>

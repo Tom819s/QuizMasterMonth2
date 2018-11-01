@@ -6,6 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -42,15 +46,15 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
     private TextView timerText;
     private TextView scorecounter, questioncounter;
     public static boolean hints;
-    private int numCorrect, numInRow, numQuestions;
+    private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
+    private SoundPool rightwrongSound;
     private boolean previouscorrect, hasStopped;
     private Button next,
             exit,
-    b1, b2, b3, b4;
+            b1, b2, b3, b4;
     private CountDownTimer gameTimer, timesup;
     private ImageButton startbtn;
-    private MediaPlayer correctSound, wrongSound, tickingSound, alarm, loopingElectro;
-
+    private MediaPlayer tickingSound, alarm, loopingElectro;
 
 
     @Override
@@ -63,7 +67,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         score = new AtomicInteger(0);
 
         Bundle bundle = getIntent().getExtras();
-        gameTime = (bundle.getInt("myKey")  * 1000) + 1000;
+        gameTime = (bundle.getInt("myKey") * 1000) + 1000;
         Log.d(TAG, "onCreate: gametime" + gameTime);
 
         ProgressBar pbar = findViewById(R.id.progressBar);
@@ -80,9 +84,22 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         timerText = findViewById(R.id.timerTextView);
 
 
-        correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            rightwrongSound = new SoundPool.Builder()
+                    .setMaxStreams(2)
+                    .setAudioAttributes(audioAttributes)
+                    .build();
+        } else {
+            rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+        }
+        rightChime = rightwrongSound.load(this, R.raw.correct, 1);
+        wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
+
         loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
-        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
         tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
         loopingElectro.setLooping(true);
@@ -167,13 +184,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         hasStopped = true;
         if (loopingElectro.isPlaying())
             loopingElectro.stop();
-        if(tickingSound.isPlaying())
+        if (tickingSound.isPlaying())
             tickingSound.stop();
         if (alarm.isPlaying())
             alarm.stop();
         if (gameTimer != null)
             gameTimer.cancel();
-        if (timesup!= null)
+        if (timesup != null)
             timesup.cancel();
     }
 
@@ -182,78 +199,91 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         Log.d(TAG, "onResume starts");
         super.onResume();
 
-        if (hasStopped){
-            if (!loopingElectro.isPlaying()){
-            loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
-            loopingElectro.setLooping(true);
-            loopingElectro.start();
+        if (hasStopped) {
+            if (!loopingElectro.isPlaying()) {
+                loopingElectro = MediaPlayer.create(MainGameActivity.this, R.raw.gameplaymusicelectro);
+                loopingElectro.setLooping(true);
+                loopingElectro.start();
             }
-        tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
-        alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
-        correctSound = MediaPlayer.create(MainGameActivity.this, R.raw.correct);
-        wrongSound = MediaPlayer.create(MainGameActivity.this, R.raw.wrong);
+            tickingSound = MediaPlayer.create(MainGameActivity.this, R.raw.tickingclock);
+            alarm = MediaPlayer.create(MainGameActivity.this, R.raw.alarmringing);
 
-        gameTimer = new CountDownTimer(timeLeft, 1000) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build();
+                rightwrongSound = new SoundPool.Builder()
+                        .setMaxStreams(2)
+                        .setAudioAttributes(audioAttributes)
+                        .build();
+            } else {
+                rightwrongSound = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+            }
+            rightChime = rightwrongSound.load(this, R.raw.correct, 1);
+            wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
 
-            public void onTick(long millisUntilFinished) {
+            gameTimer = new CountDownTimer(timeLeft, 1000) {
 
-                String count = Long.toString(millisUntilFinished / 1000);
-                millisToAnswer = gameTime - millisUntilFinished;
-                timeLeft = millisUntilFinished;
-                if (millisUntilFinished > (gameTime/2 + 1000)) {
-                    timerText.setTextColor(Color.rgb(0, 204, 0));
-                } else if (millisUntilFinished > (gameTime/4 + 1000)) {
-                    timerText.setTextColor(Color.rgb(255, 204, 0));
-                } else {
-                    if (!tickingSound.isPlaying()) {
-                        tickingSound.setVolume(5.0f, 5.0f);
-                        tickingSound.start();
+                public void onTick(long millisUntilFinished) {
+
+                    String count = Long.toString(millisUntilFinished / 1000);
+                    millisToAnswer = gameTime - millisUntilFinished;
+                    timeLeft = millisUntilFinished;
+                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
+                        timerText.setTextColor(Color.rgb(0, 204, 0));
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
+                        timerText.setTextColor(Color.rgb(255, 204, 0));
+                    } else {
+                        if (!tickingSound.isPlaying()) {
+                            tickingSound.setVolume(5.0f, 5.0f);
+                            tickingSound.start();
+                        }
+                        timerText.setTextColor(Color.rgb(204, 0, 0));
                     }
-                    timerText.setTextColor(Color.rgb(204, 0, 0));
+                    timerText.setText(count);
                 }
-                timerText.setText(count);
-            }
 
-            public void onFinish () {
-                tickingSound.stop();
-                alarm.setVolume(5.0f, 5.0f);
-                alarm.start();
-                timerText.setText("Time's Up!");
-                b1.setEnabled(false);
-                b2.setEnabled(false);
-                b3.setEnabled(false);
-                b4.setEnabled(false);
-                next.setEnabled(true);
+                public void onFinish() {
+                    tickingSound.stop();
+                    alarm.setVolume(5.0f, 5.0f);
+                    alarm.start();
+                    timerText.setText("Time's Up!");
+                    b1.setEnabled(false);
+                    b2.setEnabled(false);
+                    b3.setEnabled(false);
+                    b4.setEnabled(false);
+                    next.setEnabled(true);
 
-                if (b1.getTag() == "true")
-                    b1.setBackgroundColor(Color.GREEN);
-                else if (b2.getTag() == "true")
-                    b2.setBackgroundColor(Color.GREEN);
-                else if (b3.getTag() == "true")
-                    b3.setBackgroundColor(Color.GREEN);
-                else if (b4.getTag() == "true")
-                    b4.setBackgroundColor(Color.GREEN);
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
 
-                scorecounter.setText("Score: " + score.toString());
+                    scorecounter.setText("Score: " + score.toString());
 
-                timesup = new CountDownTimer(moveonLeft, 1000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        moveonLeft = millisUntilFinished;
-                    }
+                    timesup = new CountDownTimer(moveonLeft, 1000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            moveonLeft = millisUntilFinished;
+                        }
 
-                    @Override
-                    public void onFinish() {
-                        next.callOnClick();
-                    }
-                }.start();
+                        @Override
+                        public void onFinish() {
+                            next.callOnClick();
+                        }
+                    }.start();
 
-            }
+                }
 
-        }.start();
+            }.start();
         }
-                moveonLeft = 5000;
-                Log.d(TAG, "onResume ends");
+        moveonLeft = 5000;
+        Log.d(TAG, "onResume ends");
     }
 
     @Override
@@ -280,7 +310,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         }
 
         if (timesup != null)
-        timesup.cancel();
+            timesup.cancel();
         gameTimer.cancel();
 
         if (quiz != null && index < quiz.size()) {
@@ -295,7 +325,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             buttons.add(b4);
 
             numQuestions = quiz.size();
-            questioncounter.setText("Question: " + (index+1) + " / " + numQuestions);
+            questioncounter.setText("Question: " + (index + 1) + " / " + numQuestions);
             gameTimer = new CountDownTimer(gameTime, 1000) {
 
                 public void onTick(long millisUntilFinished) {
@@ -303,189 +333,50 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                     String count = Long.toString(millisUntilFinished / 1000);
                     millisToAnswer = gameTime - millisUntilFinished;
                     timeLeft = millisUntilFinished;
-                    if (millisUntilFinished > (gameTime/2 + 1000)) {
+                    if (millisUntilFinished > (gameTime / 2 + 1000)) {
                         timerText.setTextColor(Color.rgb(0, 204, 0));
-                    } else if (millisUntilFinished > (gameTime/4 + 1000)) {
+                    } else if (millisUntilFinished > (gameTime / 4 + 1000)) {
                         timerText.setTextColor(Color.rgb(255, 204, 0));
                     } else {
                         if (!tickingSound.isPlaying()) {
                             tickingSound.setVolume(5.0f, 5.0f);
                             tickingSound.start();
-                            if (hints){
-                            buttons.get(0).setEnabled(false);
-                            buttons.get(1).setEnabled(false);}
-                        }
-                            timerText.setTextColor(Color.rgb(204, 0, 0));
-                        }
-                        timerText.setText(count);
-                    }
-
-                    public void onFinish () {
-                        tickingSound.stop();
-                        alarm.setVolume(5.0f, 5.0f);
-                        alarm.start();
-                        timerText.setText("Time's Up!");
-                        b1.setEnabled(false);
-                        b2.setEnabled(false);
-                        b3.setEnabled(false);
-                        b4.setEnabled(false);
-                        next.setEnabled(true);
-
-                        if (b1.getTag() == "true")
-                            b1.setBackgroundColor(Color.GREEN);
-                        else if (b2.getTag() == "true")
-                            b2.setBackgroundColor(Color.GREEN);
-                        else if (b3.getTag() == "true")
-                            b3.setBackgroundColor(Color.GREEN);
-                        else if (b4.getTag() == "true")
-                            b4.setBackgroundColor(Color.GREEN);
-
-                        scorecounter.setText("Score: " + score.toString());
-
-                        timesup = new CountDownTimer(5000, 1000) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
-                            moveonLeft = millisUntilFinished;
+                            if (hints && !quiz.get(index).isTrueFalse) {
+                                buttons.get(0).setEnabled(false);
+                                buttons.get(1).setEnabled(false);
                             }
-
-                            @Override
-                            public void onFinish() {
-                                next.callOnClick();
-                            }
-                        }.start();
-
+                        }
+                        timerText.setTextColor(Color.rgb(204, 0, 0));
                     }
-
-                }.
-
-                start();
-
-
-            next.setEnabled(false);
-
-            b1.setEnabled(true);
-            b2.setEnabled(true);
-            b3.setEnabled(true);
-            b4.setEnabled(true);
-
-            b1.setClickable(true);
-            b2.setClickable(true);
-            b3.setClickable(true);
-            b4.setClickable(true);
-
-            b1.setAlpha(0.7f);
-            b2.setAlpha(0.7f);
-            b3.setAlpha(0.7f);
-            b4.setAlpha(0.7f);
-
-
-            b1.setBackgroundColor(Color.LTGRAY);
-            b2.setBackgroundColor(Color.LTGRAY);
-            b3.setBackgroundColor(Color.LTGRAY);
-            b4.setBackgroundColor(Color.LTGRAY);
-
-            question.setText(quiz.get(index).questionString);
-            quiz.get(index).RandomizeQuestionOrder();
-
-            b1.setText(quiz.get(index).answers[0].m_answer);
-            b2.setText(quiz.get(index).answers[1].m_answer);
-            b3.setText(quiz.get(index).answers[2].m_answer);
-            b4.setText(quiz.get(index).answers[3].m_answer);
-
-
-            if(quiz.get(index).answers[0].isCorrect)
-
-                {
-                    b1.setTag("true");
-                } else
-                        b1.setTag("false");
-
-            if(quiz.get(index).answers[1].isCorrect)
-
-                {
-                    b2.setTag("true");
-                } else
-                        b2.setTag("false");
-
-            if(quiz.get(index).answers[2].isCorrect)
-
-                {
-                    b3.setTag("true");
-                } else
-                        b3.setTag("false");
-
-            if(quiz.get(index).answers[3].isCorrect)
-
-                {
-                    b4.setTag("true");
-                } else
-                        b4.setTag("false");
-
-            for (int i = 0; i < buttons.size(); ++i) {
-
-                if (buttons.get(i).getTag() == "true") {
-                    buttons.remove(i);
+                    timerText.setText(count);
                 }
-            }
 
-            int randomIndex = (int) (Math.random() * 1000) % 3;
-            buttons.remove(randomIndex);
-
-// set string values for the questions
-            next.setOnClickListener((view)->
-
-                {
-                    gameTimer.cancel();
-                    if (timesup != null)
-                        timesup.cancel();
-                    next.setEnabled(false);
-
-                    if (i.get() < quiz.size() - 1) {
-                        i.set(i.get() + 1); //increment index for the game loop
-                        GameLoop(i.get()); //call game loop with new index value
-                    } else {
-                        i.set(quiz.size());
-                        Intent results = new Intent(MainGameActivity.this, Results.class);
-                        int[] gameResults = new int[3];
-                        gameResults[0] = i.get();
-                        gameResults[1] = score.get();
-                        gameResults[2] = (gameTime - 1000) / 1000;
-                        results.putExtra("gameResults", gameResults);
-                        finish();
-                        startActivity(results);
-                        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                        //sends you to the results screen
-                    }
-                }
-            );
-
-
-                //exit App
-
-                //next button functionality
-            b1.setOnClickListener((view)->
-
-                {
-                    if (tickingSound.isPlaying()) {
-                        tickingSound.stop();
-                        tickingSound.reset();
-                    }
-
-                    if (alarm.isPlaying()) {
-                        alarm.stop();
-                        alarm.reset();
-                    }
-
+                public void onFinish() {
+                    tickingSound.stop();
+                    alarm.setVolume(5.0f, 5.0f);
+                    alarm.start();
+                    timerText.setText("Time's Up!");
                     b1.setEnabled(false);
                     b2.setEnabled(false);
                     b3.setEnabled(false);
                     b4.setEnabled(false);
                     next.setEnabled(true);
-                    gameTimer.cancel();
-                    gameTimer = new CountDownTimer(5000, 1000) {
+
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
+
+                    scorecounter.setText("Score: " + score.toString());
+
+                    timesup = new CountDownTimer(5000, 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
-                            //do nothing
+                            moveonLeft = millisUntilFinished;
                         }
 
                         @Override
@@ -494,228 +385,400 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                         }
                     }.start();
 
-                    if (b1.getTag() == "true") {
-                        timerText.setText("Correct!");
-                        timerText.setTextColor(Color.GREEN);
-                        correctSound.start();
-                        if (millisToAnswer < 2500){
-                            score.set(score.get() + 10);
-                            displayMedal4();
-                        }
-                        else if (millisToAnswer < 6000)
-                            score.set(score.get() + 5);
-                        else if (millisToAnswer < 10000)
-                            score.set(score.get() + 3);
-                        else
-                            score.set(score.get() + 1);
-                        b1.setBackgroundColor(Color.GREEN);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-                        numInRow += 1;
-                        numCorrect +=1;
+                }
 
-                        if (numInRow == 3){
-                            displayMedal2();
-                            score.set(score.get() + 5);
-                            numInRow = 0;
+            }.
+
+                    start();
+
+
+            next.setEnabled(false);
+
+            if (!quiz.get(index).isTrueFalse) {
+                b1.setEnabled(true);
+                b2.setEnabled(true);
+                b3.setEnabled(true);
+                b4.setEnabled(true);
+
+                b1.setClickable(true);
+                b2.setClickable(true);
+                b3.setClickable(true);
+                b4.setClickable(true);
+
+                b1.setAlpha(0.7f);
+                b2.setAlpha(0.7f);
+                b3.setAlpha(0.7f);
+                b4.setAlpha(0.7f);
+
+
+                b1.setBackgroundColor(Color.LTGRAY);
+                b2.setBackgroundColor(Color.LTGRAY);
+                b3.setBackgroundColor(Color.LTGRAY);
+                b4.setBackgroundColor(Color.LTGRAY);
+
+                question.setText(quiz.get(index).questionString);
+                quiz.get(index).RandomizeQuestionOrder();
+
+                b1.setText(quiz.get(index).answers[0].m_answer);
+                b2.setText(quiz.get(index).answers[1].m_answer);
+                b3.setText(quiz.get(index).answers[2].m_answer);
+                b4.setText(quiz.get(index).answers[3].m_answer);
+
+
+                if (quiz.get(index).answers[0].isCorrect)
+
+                {
+                    b1.setTag("true");
+                } else
+                    b1.setTag("false");
+
+                if (quiz.get(index).answers[1].isCorrect)
+
+                {
+                    b2.setTag("true");
+                } else
+                    b2.setTag("false");
+
+                if (quiz.get(index).answers[2].isCorrect)
+
+                {
+                    b3.setTag("true");
+                } else
+                    b3.setTag("false");
+
+                if (quiz.get(index).answers[3].isCorrect)
+
+                {
+                    b4.setTag("true");
+                } else
+                    b4.setTag("false");
+
+                for (int i = 0; i < buttons.size(); ++i) {
+
+                    if (buttons.get(i).getTag() == "true") {
+                        buttons.remove(i);
+                    }
+                }
+
+                int randomIndex = (int) (Math.random() * 1000) % 3;
+                buttons.remove(randomIndex);
+            }
+            else {
+                b1.setEnabled(true);
+                b3.setEnabled(true);
+                b2.setEnabled(false);
+                b4.setEnabled(false);
+
+                b1.setClickable(true);
+                b3.setClickable(true);
+                b2.setClickable(false);
+                b4.setClickable(false);
+
+                b1.setAlpha(0.7f);
+                b3.setAlpha(0.7f);
+                b2.setAlpha(0.0f);
+                b4.setAlpha(0.0f);
+
+
+                b1.setBackgroundColor(Color.LTGRAY);
+                b3.setBackgroundColor(Color.LTGRAY);
+
+                question.setText(quiz.get(index).questionString);
+
+                b1.setText("true");
+                b3.setText("false");
+
+
+                if (quiz.get(index).correctAns)
+                {
+                    b1.setTag("true");
+                } else
+                    b1.setTag("false");
+
+                if (quiz.get(index).correctAns)
+                {
+                    b3.setTag("false");
+                } else
+                    b3.setTag("true");
+
+            }
+// set string values for the questions
+            next.setOnClickListener((view) ->
+
+                    {
+                        gameTimer.cancel();
+                        if (timesup != null)
+                            timesup.cancel();
+                        next.setEnabled(false);
+
+                        if (i.get() < quiz.size() - 1) {
+                            i.set(i.get() + 1); //increment index for the game loop
+                            GameLoop(i.get()); //call game loop with new index value
+                        } else {
+                            i.set(quiz.size());
+                            Intent results = new Intent(MainGameActivity.this, Results.class);
+                            int[] gameResults = new int[3];
+                            gameResults[0] = i.get();
+                            gameResults[1] = score.get();
+                            gameResults[2] = (gameTime - 1000) / 1000;
+                            results.putExtra("gameResults", gameResults);
+                            finish();
+                            startActivity(results);
+                            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                            //sends you to the results screen
                         }
-                    } else {
+                    }
+            );
+
+
+            //exit App
+
+            //next button functionality
+            b1.setOnClickListener((view) ->
+
+            {
+                if (tickingSound.isPlaying()) {
+                    tickingSound.stop();
+                    tickingSound.reset();
+                }
+
+                if (alarm.isPlaying()) {
+                    alarm.stop();
+                    alarm.reset();
+                }
+
+                b1.setEnabled(false);
+                b2.setEnabled(false);
+                b3.setEnabled(false);
+                b4.setEnabled(false);
+                next.setEnabled(true);
+                gameTimer.cancel();
+                gameTimer = new CountDownTimer(5000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        //do nothing
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        next.callOnClick();
+                    }
+                }.start();
+
+                if (b1.getTag() == "true") {
+                    timerText.setText("Correct!");
+                    timerText.setTextColor(Color.GREEN);
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
+                        score.set(score.get() + 5);
+                    else if (millisToAnswer < 10000)
+                        score.set(score.get() + 3);
+                    else
+                        score.set(score.get() + 1);
+                    b1.setBackgroundColor(Color.GREEN);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    numInRow += 1;
+                    numCorrect += 1;
+
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
                         numInRow = 0;
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-
-                        wrongSound.reset();
-                        wrongSound.start();
-                        timerText.setText("Wrong!");
-                        timerText.setTextColor(Color.rgb(255,0,0));
-                        b1.setBackgroundColor(Color.RED);
-                        if (b2.getTag() == "true")
-                            b2.setBackgroundColor(Color.GREEN);
-                        else if (b3.getTag() == "true")
-                            b3.setBackgroundColor(Color.GREEN);
-                        else if (b4.getTag() == "true")
-                            b4.setBackgroundColor(Color.GREEN);
+                    }
+                } else {
+                    numInRow = 0;
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
+                    timerText.setText("Wrong!");
+                    timerText.setTextColor(Color.rgb(255, 0, 0));
+                    b1.setBackgroundColor(Color.RED);
+                    if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
 //                    Context context = getApplicationContext();
 //                    CharSequence text = "Wrong!";
 //                    int duration = Toast.LENGTH_SHORT;
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
+                }
+
+                scorecounter.setText("Score: " + score.toString());
+            });
+
+
+            b2.setOnClickListener((view) ->
+
+            {
+
+                if (tickingSound.isPlaying()) {
+                    tickingSound.stop();
+                    tickingSound.reset();
+                }
+
+                if (alarm.isPlaying()) {
+                    alarm.stop();
+                    alarm.reset();
+                }
+
+                gameTimer.cancel();
+
+                gameTimer = new CountDownTimer(5000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
                     }
 
-                    scorecounter.setText("Score: " + score.toString());
-                });
-
-
-            b2.setOnClickListener((view)->
-
-                {
-
-                    if (tickingSound.isPlaying()) {
-                        tickingSound.stop();
-                        tickingSound.reset();
+                    @Override
+                    public void onFinish() {
+                        next.callOnClick();
                     }
+                }.start();
 
-                    if (alarm.isPlaying()) {
-                        alarm.stop();
-                        alarm.reset();
-                    }
+                next.setEnabled(true);
+                b1.setEnabled(false);
+                b2.setEnabled(false);
+                b3.setEnabled(false);
+                b4.setEnabled(false);
+                if (b2.getTag() == "true") {
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
+                    timerText.setText("Correct!");
+                    timerText.setTextColor(Color.GREEN);
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
+                        score.set(score.get() + 5);
+                    else if (millisToAnswer < 10000)
+                        score.set(score.get() + 3);
+                    else
+                        score.set(score.get() + 1);
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.GREEN);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    numInRow += 1;
+                    numCorrect += 1;
 
-                    gameTimer.cancel();
-
-                    gameTimer = new CountDownTimer(5000, 1000) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
-
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            next.callOnClick();
-                        }
-                    }.start();
-
-                    next.setEnabled(true);
-                    b1.setEnabled(false);
-                    b2.setEnabled(false);
-                    b3.setEnabled(false);
-                    b4.setEnabled(false);
-                    if (b2.getTag() == "true") {
-
-                        correctSound.start();
-                        timerText.setText("Correct!");
-                        timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 2500){
-                            score.set(score.get()+ 10);
-                            displayMedal4();
-                        }
-                        else if (millisToAnswer < 6000)
-                            score.set(score.get() + 5);
-                        else if (millisToAnswer < 10000)
-                            score.set(score.get() + 3);
-                        else
-                            score.set(score.get() + 1);
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.GREEN);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-                        numInRow += 1;
-                        numCorrect +=1;
-
-                        if (numInRow == 3){
-                            displayMedal2();
-                            score.set(score.get() + 5);
-                            numInRow = 0;
-                        }
-
-                    } else {
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
                         numInRow = 0;
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-                        wrongSound.reset();
-                        wrongSound.start();
-                        timerText.setText("Wrong!");
-                        timerText.setTextColor(Color.rgb(255,0,0));
+                    }
 
-                        if (b1.getTag() == "true")
-                            b1.setBackgroundColor(Color.GREEN);
-                        else if (b3.getTag() == "true")
-                            b3.setBackgroundColor(Color.GREEN);
-                        else if (b4.getTag() == "true")
-                            b4.setBackgroundColor(Color.GREEN);
+                } else {
+                    numInRow = 0;
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
+                    timerText.setText("Wrong!");
+                    timerText.setTextColor(Color.rgb(255, 0, 0));
 
-                        b2.setBackgroundColor(Color.RED);
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
+
+                    b2.setBackgroundColor(Color.RED);
 //                    Context context = getApplicationContext();
 //                    CharSequence text = "Wrong!";
 //                    int duration = Toast.LENGTH_SHORT;
 //
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
+                }
+                scorecounter.setText("Score: " + score.toString());
+            });
+
+
+            b3.setOnClickListener((view) ->
+
+            {
+                if (tickingSound.isPlaying()) {
+                    tickingSound.stop();
+                    tickingSound.reset();
+                }
+
+                if (alarm.isPlaying()) {
+                    alarm.stop();
+                    alarm.reset();
+                }
+
+                gameTimer.cancel();
+                gameTimer = new CountDownTimer(5000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
                     }
-                    scorecounter.setText("Score: " + score.toString());
-                });
 
-
-            b3.setOnClickListener((view)->
-
-                {
-                    if (tickingSound.isPlaying()) {
-                        tickingSound.stop();
-                        tickingSound.reset();
+                    @Override
+                    public void onFinish() {
+                        next.callOnClick();
                     }
+                }.start();
 
-                    if (alarm.isPlaying()) {
-                        alarm.stop();
-                        alarm.reset();
-                    }
+                next.setEnabled(true);
+                b1.setEnabled(false);
+                b2.setEnabled(false);
+                b3.setEnabled(false);
+                b4.setEnabled(false);
 
-                    gameTimer.cancel();
-                    gameTimer = new CountDownTimer(5000, 1000) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
+                if (b3.getTag() == "true") {
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
+                        score.set(score.get() + 5);
+                    else if (millisToAnswer < 10000)
+                        score.set(score.get() + 3);
+                    else
+                        score.set(score.get() + 1);
+                    timerText.setText("Correct!");
+                    timerText.setTextColor(Color.GREEN);
 
-                        }
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.GREEN);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    numInRow += 1;
+                    numCorrect += 1;
 
-                        @Override
-                        public void onFinish() {
-                            next.callOnClick();
-                        }
-                    }.start();
-
-                    next.setEnabled(true);
-                    b1.setEnabled(false);
-                    b2.setEnabled(false);
-                    b3.setEnabled(false);
-                    b4.setEnabled(false);
-
-                    if (b3.getTag() == "true") {
-                        correctSound.start();
-                        if (millisToAnswer < 2500){
-                            score.set(score.get() + 10);
-                            displayMedal4();
-                        }
-                        else if (millisToAnswer < 6000)
-                            score.set(score.get() + 5);
-                        else if (millisToAnswer < 10000)
-                            score.set(score.get() + 3);
-                        else
-                            score.set(score.get() + 1);
-                        timerText.setText("Correct!");
-                        timerText.setTextColor(Color.GREEN);
-
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.GREEN);
-                        b4.setBackgroundColor(Color.LTGRAY);
-                        numInRow += 1;
-                        numCorrect +=1;
-
-                        if (numInRow == 3){
-                            displayMedal2();
-                            score.set(score.get() + 5);
-                            numInRow = 0;
-                        }
-
-                    } else {
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
                         numInRow = 0;
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-                        wrongSound.reset();
-                        wrongSound.start();
-                        if (b1.getTag() == "true")
-                            b1.setBackgroundColor(Color.GREEN);
-                        else if (b2.getTag() == "true")
-                            b2.setBackgroundColor(Color.GREEN);
-                        else if (b4.getTag() == "true")
-                            b4.setBackgroundColor(Color.GREEN);
-                        b3.setBackgroundColor(Color.RED);
-                        timerText.setTextColor(Color.RED);
-                        timerText.setText("Wrong!");
+                    }
+
+                } else {
+                    numInRow = 0;
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b4.getTag() == "true")
+                        b4.setBackgroundColor(Color.GREEN);
+                    b3.setBackgroundColor(Color.RED);
+                    timerText.setTextColor(Color.RED);
+                    timerText.setText("Wrong!");
 //                    timerText.setTextColor(Color.RED);
 //                    Context context = getApplicationContext();
 //                    CharSequence text = "Wrong!";
@@ -723,188 +786,191 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 //
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
+                }
+                scorecounter.setText("Score: " + score.toString());
+            });
+
+            b4.setOnClickListener((view) ->
+            {
+
+                if (tickingSound.isPlaying()) {
+                    tickingSound.stop();
+                    tickingSound.reset();
+                }
+
+                if (alarm.isPlaying()) {
+                    alarm.stop();
+                    alarm.reset();
+                }
+
+                gameTimer.cancel();
+                gameTimer = new CountDownTimer(5000, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
                     }
-                    scorecounter.setText("Score: " + score.toString());
-                });
 
-            b4.setOnClickListener((view)->
-                {
-
-                    if (tickingSound.isPlaying()) {
-                        tickingSound.stop();
-                        tickingSound.reset();
+                    @Override
+                    public void onFinish() {
+                        next.callOnClick();
                     }
+                }.start();
 
-                    if (alarm.isPlaying()) {
-                        alarm.stop();
-                        alarm.reset();
-                    }
+                next.setEnabled(true);
+                b1.setEnabled(false);
+                b2.setEnabled(false);
+                b3.setEnabled(false);
+                b4.setEnabled(false);
 
-                    gameTimer.cancel();
-                    gameTimer = new CountDownTimer(5000, 1000) {
-                        @Override
-                        public void onTick(long millisUntilFinished) {
+                if (b4.getTag() == "true") {
+                    rightwrongSound.play(rightChime, 1, 1, 0, 0, 1);
+                    timerText.setText("Correct!");
+                    timerText.setTextColor(Color.GREEN);
+                    if (millisToAnswer < 2500) {
+                        score.set(score.get() + 10);
+                        displayMedal4();
+                    } else if (millisToAnswer < 6000)
+                        score.set(score.get() + 5);
+                    else if (millisToAnswer < 10000)
+                        score.set(score.get() + 3);
+                    else
+                        score.set(score.get() + 1);
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.GREEN);
+                    numInRow += 1;
+                    numCorrect += 1;
 
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            next.callOnClick();
-                        }
-                    }.start();
-
-                    next.setEnabled(true);
-                    b1.setEnabled(false);
-                    b2.setEnabled(false);
-                    b3.setEnabled(false);
-                    b4.setEnabled(false);
-
-                    if (b4.getTag() == "true") {
-                        correctSound.start();
-                        timerText.setText("Correct!");
-                        timerText.setTextColor(Color.GREEN);
-                        if (millisToAnswer < 2500){
-                            score.set(score.get() + 10);
-                            displayMedal4();
-                        }
-                        else if (millisToAnswer < 6000)
-                            score.set(score.get() + 5);
-                        else if (millisToAnswer < 10000)
-                            score.set(score.get() + 3);
-                        else
-                            score.set(score.get() + 1);
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.GREEN);
-                        numInRow += 1;
-                        numCorrect +=1;
-
-                        if (numInRow == 3){
-                            displayMedal2();
-                            score.set(score.get() + 5);
-                            numInRow = 0;
-                        }
-                    } else {
+                    if (numInRow == 3) {
+                        displayMedal2();
+                        score.set(score.get() + 5);
                         numInRow = 0;
-                        b1.setBackgroundColor(Color.LTGRAY);
-                        b2.setBackgroundColor(Color.LTGRAY);
-                        b3.setBackgroundColor(Color.LTGRAY);
-                        b4.setBackgroundColor(Color.LTGRAY);
-
-                        wrongSound.start();
-                        timerText.setText("Wrong!");
-                        timerText.setTextColor(Color.RED);
-                        if (b1.getTag() == "true")
-                            b1.setBackgroundColor(Color.GREEN);
-                        else if (b2.getTag() == "true")
-                            b2.setBackgroundColor(Color.GREEN);
-                        else if (b3.getTag() == "true")
-                            b3.setBackgroundColor(Color.GREEN);
-                        b4.setBackgroundColor(Color.RED);
+                    }
+                } else {
+                    numInRow = 0;
+                    b1.setBackgroundColor(Color.LTGRAY);
+                    b2.setBackgroundColor(Color.LTGRAY);
+                    b3.setBackgroundColor(Color.LTGRAY);
+                    b4.setBackgroundColor(Color.LTGRAY);
+                    rightwrongSound.play(wrongChime, 1, 1, 0, 0, 1);
+                    timerText.setText("Wrong!");
+                    timerText.setTextColor(Color.RED);
+                    if (b1.getTag() == "true")
+                        b1.setBackgroundColor(Color.GREEN);
+                    else if (b2.getTag() == "true")
+                        b2.setBackgroundColor(Color.GREEN);
+                    else if (b3.getTag() == "true")
+                        b3.setBackgroundColor(Color.GREEN);
+                    b4.setBackgroundColor(Color.RED);
 //                    Context context = getApplicationContext();
 //                    CharSequence text = "Wrong!";
 //                    int duration = Toast.LENGTH_SHORT;
 //
 //                    Toast toast = Toast.makeText(context, text, duration);
 //                    toast.show();
-                    }
-                    scorecounter.setText("Score: " + score.toString());
+                }
+                scorecounter.setText("Score: " + score.toString());
 
-                });
+            });
+        }
+    }
+
+    public void leaveGame() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainGameActivity.this);
+
+        builder.setCancelable(false);
+        builder.setTitle("Leave Game");
+        builder.setMessage("Are you sure you want to leave the game?");
+
+        // Setting Negative "Cancel" Button
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                dialog.cancel();
             }
-        }
+        });
 
-        public void leaveGame () {
+        // Setting Positive "Yes" Button
+        builder.setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                tickingSound.stop();
+                gameTimer.cancel();
+                Intent menuActivity = new Intent(MainGameActivity.this, MainMenu.class);
+                finish();
+                startActivity(menuActivity);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+        });
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainGameActivity.this);
+        builder.show();
+    }
 
-            builder.setCancelable(false);
-            builder.setTitle("Leave Game");
-            builder.setMessage("Are you sure you want to leave the game?");
-
-            // Setting Negative "Cancel" Button
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.cancel();
-                }
-            });
-
-            // Setting Positive "Yes" Button
-            builder.setPositiveButton("Leave", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    tickingSound.stop();
-                    gameTimer.cancel();
-                    Intent menuActivity = new Intent(MainGameActivity.this, MainMenu.class);
-                    finish();
-                    startActivity(menuActivity);
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                }
-            });
-
-            builder.show();
-        }
     public void displayMedal1() {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_1,
                 findViewById(R.id.relativeLayout1));
         Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.setView(view);
         toast.show();
 
 
     }
+
     public void displayMedal2() {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_2,
                 findViewById(R.id.relativeLayout1));
         Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.setView(view);
         toast.show();
 
 
     }
+
     public void displayMedal3() {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_3,
                 findViewById(R.id.relativeLayout1));
         Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.setView(view);
         toast.show();
 
 
     }
+
     public void displayMedal4() {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_4,
                 findViewById(R.id.relativeLayout1));
         Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.setView(view);
         toast.show();
 
 
     }
+
     public void displayMedal5() {
 
         LayoutInflater toastInflater = getLayoutInflater();
         View view = toastInflater.inflate(R.layout.medal_5,
                 findViewById(R.id.relativeLayout1));
         Toast toast = new Toast(this);
-        toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.setView(view);
         toast.show();
 
 
     }
 
-    }
+}
 
 

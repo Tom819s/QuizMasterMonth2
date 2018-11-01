@@ -2,7 +2,7 @@ package pp2.fullsailuniversity.secondbuild;
 
 public class TriviaDBURLcreator {
 
-    public String mCategory, mDifficulty;
+    public String mCategory, mDifficulty, mType;
     public int mNumQuestions;
 
     public String createURL() throws java.io.IOException {
@@ -54,9 +54,19 @@ public class TriviaDBURLcreator {
                 // if no specific difficulty selected, allow all kinds to be used
             }
         }
-        //currently only support multi-choice
-        //TODO add code to support true/false as well
-        newURL.append("&type=multiple");
+
+        if (mType != null) {
+            switch (mType) {
+                case "boolean":
+                    newURL.append("&type=boolean");
+                    break;
+                case "multiple":
+                    newURL.append("&type=multiple");
+                    break;
+                default:
+                    break;
+            }
+        }
 
         return newURL.toString();
 
