@@ -25,7 +25,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -2007,6 +2006,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     private void waitScreen()
     {
 
+        iAtm.set(iAtm.get() + 1);
+        questioncounter.setText(iAtm.get());
         questionAnswerTimer.cancel();
         next.setClickable(false);
 
@@ -2029,7 +2030,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         b3.setAlpha(0.0f);
         b4.setAlpha(0.0f);
 
-        iAtm.set(iAtm.get() + 1);
         timerText.setText("Waiting for opponent to finish question");
     }
 
