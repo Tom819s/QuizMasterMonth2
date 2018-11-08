@@ -91,13 +91,14 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     public static boolean hints, isHost, pressedTimer;
     private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
     private boolean previouscorrect, hasStopped;
+    private QuizQuestion receivedQuestion;
     private Button next,
             exit,
             b1, b2, b3, b4;
-    private CountDownTimer gameTimer, timesup;
+    private CountDownTimer gameTimer, timesup, questionAnswerTimer;
     private ImageButton startbtn, timerbtn;
     private SoundPool rightwrongSound;
-    private MediaPlayer correctSound, tickingSound, alarm, loopingElectro;
+    private MediaPlayer tickingSound, alarm, loopingElectro;
 
 
     @Override
@@ -214,6 +215,25 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                 }
         );
 
+        timerbtn.setOnClickListener(v ->
+                {
+
+                    questionAnswerTimer.cancel();
+                    Log.d(TAG, "timerbutton onclick " + opponentEndpointId);
+                    pressedTimer = true;
+
+                    String timeToPress = "TIMER SUBMITTED\n" + timeToHitButton;
+                    Payload timerPayload = Payload.fromBytes(timeToPress.toString().getBytes());
+                    Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, timerPayload);
+                    timerbtn.setAlpha(0.0f);
+                    timerbtn.setClickable(false);
+                    timerbtn.setEnabled(false);
+                    if (isHost) {
+                        GameLoop(iAtm.get());
+                    }
+                }
+        );
+
         exit.setOnClickListener((view) ->
         {
             if (loopingElectro.isPlaying())
@@ -280,7 +300,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
             }
             tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
             alarm = MediaPlayer.create(MultiplayerGameHost.this, R.raw.alarmringing);
-            correctSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.correct);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -467,79 +486,124 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
 
             next.setEnabled(false);
-
-            b1.setEnabled(true);
-            b2.setEnabled(true);
-            b3.setEnabled(true);
-            b4.setEnabled(true);
-
-            b1.setClickable(true);
-            b2.setClickable(true);
-            b3.setClickable(true);
-            b4.setClickable(true);
-
-            b1.setAlpha(0.7f);
-            b2.setAlpha(0.7f);
-            b3.setAlpha(0.7f);
-            b4.setAlpha(0.7f);
-
-
-            b1.setBackgroundColor(Color.LTGRAY);
-            b2.setBackgroundColor(Color.LTGRAY);
-            b3.setBackgroundColor(Color.LTGRAY);
-            b4.setBackgroundColor(Color.LTGRAY);
-
-            question.setText(quiz.get(index).questionString);
-            quiz.get(index).RandomizeQuestionOrder();
-
-            b1.setText(quiz.get(index).answers[0].m_answer);
-            b2.setText(quiz.get(index).answers[1].m_answer);
-            b3.setText(quiz.get(index).answers[2].m_answer);
-            b4.setText(quiz.get(index).answers[3].m_answer);
-
-
-            if (quiz.get(index).answers[0].isCorrect)
-
+            if (!quiz.get(index).isTrueFalse)
             {
-                b1.setTag("true");
-            } else
-                b1.setTag("false");
+                b1.setEnabled(true);
+                b2.setEnabled(true);
+                b3.setEnabled(true);
+                b4.setEnabled(true);
 
-            if (quiz.get(index).answers[1].isCorrect)
+                b1.setClickable(true);
+                b2.setClickable(true);
+                b3.setClickable(true);
+                b4.setClickable(true);
 
-            {
-                b2.setTag("true");
-            } else
-                b2.setTag("false");
+                b1.setAlpha(0.7f);
+                b2.setAlpha(0.7f);
+                b3.setAlpha(0.7f);
+                b4.setAlpha(0.7f);
 
-            if (quiz.get(index).answers[2].isCorrect)
 
-            {
-                b3.setTag("true");
-            } else
-                b3.setTag("false");
+                b1.setBackgroundColor(Color.LTGRAY);
+                b2.setBackgroundColor(Color.LTGRAY);
+                b3.setBackgroundColor(Color.LTGRAY);
+                b4.setBackgroundColor(Color.LTGRAY);
 
-            if (quiz.get(index).answers[3].isCorrect)
+                question.setText(quiz.get(index).questionString);
+                quiz.get(index).RandomizeQuestionOrder();
 
-            {
-                b4.setTag("true");
-            } else
-                b4.setTag("false");
+                b1.setText(quiz.get(index).answers[0].m_answer);
+                b2.setText(quiz.get(index).answers[1].m_answer);
+                b3.setText(quiz.get(index).answers[2].m_answer);
+                b4.setText(quiz.get(index).answers[3].m_answer);
 
-            for (int i = 0; i < buttons.size(); ++i) {
 
-                if (buttons.get(i).getTag() == "true") {
-                    buttons.remove(i);
+                if (quiz.get(index).answers[0].isCorrect)
+
+                {
+                    b1.setTag("true");
+                } else
+                    b1.setTag("false");
+
+                if (quiz.get(index).answers[1].isCorrect)
+
+                {
+                    b2.setTag("true");
+                } else
+                    b2.setTag("false");
+
+                if (quiz.get(index).answers[2].isCorrect)
+
+                {
+                    b3.setTag("true");
+                } else
+                    b3.setTag("false");
+
+                if (quiz.get(index).answers[3].isCorrect)
+
+                {
+                    b4.setTag("true");
+                } else
+                    b4.setTag("false");
+
+                for (int i = 0; i < buttons.size(); ++i)
+                {
+
+                    if (buttons.get(i).getTag() == "true")
+                    {
+                        buttons.remove(i);
+                    }
                 }
-            }
 
-            int randomIndex = (int) (Math.random() * 1000) % 3;
-            buttons.remove(randomIndex);
+                int randomIndex = (int) (Math.random() * 1000) % 3;
+                buttons.remove(randomIndex);
+            }
+            else{
+
+                b1.setEnabled(true);
+                b3.setEnabled(true);
+                b2.setEnabled(false);
+                b4.setEnabled(false);
+
+                b1.setClickable(true);
+                b3.setClickable(true);
+                b2.setClickable(false);
+                b4.setClickable(false);
+
+                b1.setAlpha(0.7f);
+                b3.setAlpha(0.7f);
+                b2.setAlpha(0.0f);
+                b4.setAlpha(0.0f);
+
+
+                b1.setBackgroundColor(Color.LTGRAY);
+                b3.setBackgroundColor(Color.LTGRAY);
+
+                question.setText(quiz.get(index).questionString);
+
+                b1.setText("true");
+                b3.setText("false");
+
+
+                if (quiz.get(index).correctAns)
+                {
+                    b1.setTag("true");
+                } else
+                    b1.setTag("false");
+
+                if (quiz.get(index).correctAns)
+                {
+                    b3.setTag("false");
+                } else
+                    b3.setTag("true");
+            }
 
 // set string values for the questions
             next.setOnClickListener((view) ->
                     {
 
+                        question.setText(" ");
+                        timerText.setText(" ");
                         String tosend = "START TIMER";
                         Payload chatPayload = Payload.fromBytes(tosend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
@@ -551,11 +615,15 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                         if (iAtm.get() < quiz.size() - 1) {
                             iAtm.set(iAtm.get() + 1); //increment index for the game loop
-                            GameLoop(iAtm.get()); //call game loop with new index value
+                            startTimer(); // move back to timer mode
                         } else {
                             iAtm.set(quiz.size());
                             Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
+                            String toSend = new String("END GAME");
+                            Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
+
                             gameResults[0] = iAtm.get();
                             gameResults[1] = score.get();
                             gameResults[2] = (gameTime - 1000) / 1000;
@@ -1516,12 +1584,12 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                     switch (lines[0]) {
                         case "QUIZ QUESTION": {
-                            QuizQuestion receivedQuestion;
-                            if (lines[2].equals("True"))
-                                receivedQuestion = new QuizQuestion(lines[1], true);
-                            else
-                                receivedQuestion = new QuizQuestion(lines[1], false);
+                            Answer a1 = new Answer(lines[2], true);
+                            Answer a2 = new Answer(lines[3], false);
+                            Answer a3 = new Answer(lines[4], false);
+                            Answer a4 = new Answer(lines[5], false);
 
+                            receivedQuestion = new QuizQuestion(lines[1], a1,a2,a3,a4);
                             GameLoop(receivedQuestion, iAtm.get());
                             //setupScreen(lines)
                             //run code to set up reg. MC question
@@ -1532,9 +1600,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                             Answer a1 = new Answer(lines[2], true);
                             Answer a2 = new Answer(lines[3], false);
-                            Answer a3 = new Answer(lines[4], false);
-                            Answer a4 = new Answer(lines[5], false);
-                            QuizQuestion receivedQuestion = new QuizQuestion(lines[1], a1, a2, a3, a4);
+                            QuizQuestion receivedQuestion = new QuizQuestion(lines[1],true);
 
                             GameLoop(receivedQuestion, iAtm.get());
                             //run code to set up TF question
@@ -1756,6 +1822,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     }
 
     private void waitScreen() {
+        questionAnswerTimer.cancel();
         next.setClickable(false);
 
         b1.setEnabled(false);
@@ -1774,6 +1841,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         b4.setAlpha(0.0f);
 
         timerText.setText("Waiting for opponent to finish question");
+        iAtm.set(iAtm.get() + 1);
     }
 
 
@@ -1798,7 +1866,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         timerbtn.setClickable(true);
         timerbtn.setAlpha(1.0f);
 
-        CountDownTimer questionAnswerTimer = new CountDownTimer(20000, 100) {
+        questionAnswerTimer = new CountDownTimer(20000, 100) {
 
             public void onTick(long millisUntilFinished) {
                 if (millisUntilFinished % 1000 == 0) {

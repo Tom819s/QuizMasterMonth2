@@ -1,5 +1,7 @@
 package pp2.fullsailuniversity.secondbuild;
 
+import android.util.Log;
+
 import java.io.Serializable;
 
 public class QuizQuestion implements Serializable
@@ -34,14 +36,16 @@ public class QuizQuestion implements Serializable
     {
         String quizString = new String();
 
-        if (isTrueFalse)
+        Log.d("quizquestion to string", "toString: " + questionString );
+        if (answers != null)
         {
+            Log.d("quizquestion to string ", "toString: " + answers[0].m_answer);
             quizString = "QUIZ QUESTION\n";
-            quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n' + answers[2] + '\n' + answers[3] + '\n' + whichIsRight();
+            quizString += questionString + '\n' + answers[0].m_answer + '\n' + answers[1].m_answer + '\n' + answers[2].m_answer + '\n' + answers[3].m_answer + '\n' + whichIsRight();
         } else
         {
             quizString = "QUIZ QUESTION TF\n";
-            quizString += questionString + '\n' + answers[0] + '\n' + answers[1] + '\n';
+            quizString += questionString + '\n' + correctAns;
         }
         return quizString;
     }
