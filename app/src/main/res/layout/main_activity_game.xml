@@ -7,23 +7,6 @@
     android:background="#eaf5ff"
     tools:context=".MainActivity">
 
-    <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="595dp"
-        android:layout_height="866dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="19dp"
-        android:scaleType="fitXY"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.214"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/blackboarder" />
-
     <Button
         android:id="@+id/button1"
         style="@style/Widget.AppCompat.Button"

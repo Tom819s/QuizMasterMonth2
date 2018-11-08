@@ -7,22 +7,6 @@
     android:background="#eaf5ff"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView6"
-        android:layout_width="593dp"
-        android:layout_height="876dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.666"
-        app:srcCompat="@drawable/blackboarder" />
-
     <TextView
         android:id="@+id/resultsText"
         android:layout_width="221dp"
@@ -44,14 +28,14 @@
         android:id="@+id/return_to_menu"
         android:layout_width="137dp"
         android:layout_height="65dp"
-        android:layout_marginStart="100dp"
+        android:layout_marginStart="28dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="44dp"
         android:text="Menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.998" />
 
     <Button
         android:id="@+id/retryGame"
@@ -64,35 +48,36 @@
         android:text="Retry"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.62"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/return_to_menu"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.996" />
 
     <ImageView
         android:id="@+id/quizGrade"
         android:layout_width="255dp"
         android:layout_height="270dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="148dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.006"
+        app:layout_constraintVertical_bias="0.176"
         app:srcCompat="@drawable/grade_a" />
 
     <TextView
         android:id="@+id/gradeCriteria"
         android:layout_width="275dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="104dp"
+        android:layout_marginTop="24dp"
         android:gravity="center"
         android:text="TextView"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/resultsText"
+        app:layout_constraintHorizontal_bias="0.518"
         app:layout_constraintStart_toStartOf="@+id/resultsText"
         app:layout_constraintTop_toBottomOf="@+id/resultsText" />
 

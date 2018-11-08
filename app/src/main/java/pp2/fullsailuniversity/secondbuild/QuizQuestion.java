@@ -39,7 +39,7 @@ public class QuizQuestion implements Serializable
         Log.d("quizquestion to string", "toString: " + questionString );
         if (answers != null)
         {
-            Log.d("quizquestion to string ", "toString: " + answers[0].m_answer);
+            Log.d("quizquestion to string ", "toString: " + answers[0].m_answer + '\n' + whichIsRight());
             quizString = "QUIZ QUESTION\n";
             quizString += questionString + '\n' + answers[0].m_answer + '\n' + answers[1].m_answer + '\n' + answers[2].m_answer + '\n' + answers[3].m_answer + '\n' + whichIsRight();
         } else

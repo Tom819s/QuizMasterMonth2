@@ -73,7 +73,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
 
     private static final Strategy STRATEGY = Strategy.P2P_STAR;
-    private String opponentEndpointId;
+    private String opponentEndpointId, enemyScore;
     private String opponentName, userName;
     private TextView statusText;
     private TextView scoreText;
@@ -620,7 +620,9 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                             iAtm.set(quiz.size());
                             Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
-                            String toSend = new String("END GAME");
+
+
+                            String toSend = new String("END GAME\n" + score.get());
                             Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
                             Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
 
@@ -1598,8 +1600,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                         case "QUIZ QUESTION TF": {
                             //setupScreenTF(lines)
 
-                            Answer a1 = new Answer(lines[2], true);
-                            Answer a2 = new Answer(lines[3], false);
                             QuizQuestion receivedQuestion = new QuizQuestion(lines[1],true);
 
                             GameLoop(receivedQuestion, iAtm.get());
@@ -1618,6 +1618,9 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                         }
                         case "START TIMER": {
                             //startTiming()
+
+                            if (questionAnswerTimer != null)
+                                questionAnswerTimer.cancel();
                             startTimer();
                             //run code to start timer
                             break;
@@ -1630,14 +1633,21 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                                     Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
                                     Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
 
-                                    waitScreen();
                                 }
+                                question.setText("Opponent answered first");
+                                waitScreen();
                             }
                             //run code to compare times, if host hasn't hit timer yet, by default opponent wins
                             break;
                         }
                         case "END GAME": {
                             //gotoResults(lines)
+
+                            String toSend = new String("END GAME\n" + score.get());
+                            Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
+                            enemyScore = lines[1];
+
                             iAtm.set(quiz.size());
                             Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
@@ -1708,6 +1718,8 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                 @Override
                 public void onDisconnected(String endpointId) {
                     Log.i(TAG, "onDisconnected: disconnected from the opponent");
+
+                    Toast.makeText(getApplicationContext(), "Opponent Disconnected", Toast.LENGTH_LONG);
                     resetGame();
                 }
             };
@@ -1824,6 +1836,9 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     private void waitScreen() {
         questionAnswerTimer.cancel();
         next.setClickable(false);
+        timerbtn.setEnabled(false);
+        timerbtn.setAlpha(0.0f);
+        timerbtn.setClickable(false);
 
         b1.setEnabled(false);
         b2.setEnabled(false);
@@ -1839,13 +1854,19 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         b2.setAlpha(0.0f);
         b3.setAlpha(0.0f);
         b4.setAlpha(0.0f);
-
+        iAtm.set(iAtm.get()+1);
         timerText.setText("Waiting for opponent to finish question");
-        iAtm.set(iAtm.get() + 1);
     }
 
 
     private void startTimer() {
+
+        question.setTextColor(Color.BLACK);
+        question.setText("Hit before your opponent!");
+
+        timerText.setTextColor(Color.BLACK);
+        timerText.setText("Go!");
+
         pressedTimer = false;
         b1.setEnabled(false);
         b2.setEnabled(false);
@@ -1869,12 +1890,9 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         questionAnswerTimer = new CountDownTimer(20000, 100) {
 
             public void onTick(long millisUntilFinished) {
-                if (millisUntilFinished % 1000 == 0) {
-
-                    Log.d(TAG, "onTick: " + millisUntilFinished);
-                    timerText.setText(Long.toString((millisUntilFinished) / 1000));
+                String count = Long.toString(millisUntilFinished / 1000);
+                    timerText.setText(count);
                     timeToHitButton = 20000 - millisUntilFinished;
-                }
             }
 
             public void onFinish() {
@@ -1885,7 +1903,11 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                 timerText.setText("Out of time!");
                 timesup = new CountDownTimer(5000, 1000) {
                     @Override
+
                     public void onTick(long millisUntilFinished) {
+
+                        String count = Long.toString(millisUntilFinished / 1000);
+                        timerText.setText(count);
                     }
 
                     @Override

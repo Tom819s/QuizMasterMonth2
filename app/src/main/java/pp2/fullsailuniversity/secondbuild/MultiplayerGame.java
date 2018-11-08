@@ -75,7 +75,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
 
     private String opponentEndpointId;
-    private String opponentName, userName;
+    private String opponentName, userName, enemyScore;
     private TextView statusText;
     private TextView scoreText;
 
@@ -1725,6 +1725,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             Answer a4 = new Answer(lines[5], false);
 
                             receivedQuestion = new QuizQuestion(lines[1], a1,a2,a3,a4);
+                            receivedQuestion.RandomizeQuestionOrder();
                             GameLoop(receivedQuestion, iAtm.get());
                             //setupScreen(lines)
                             //run code to set up reg. MC question
@@ -1734,7 +1735,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         {
                             //setupScreenTF(lines)
                             receivedQuestion = new QuizQuestion(lines[1], true);
-
+                            //TODO change to check truth values
                             GameLoop(receivedQuestion, iAtm.get());
                             //run code to set up TF question
                             break;
@@ -1742,6 +1743,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         case "DEBUFF":
                         {
                             //takeDamage(lines)
+                            //TODO add debuffs
                             //run code to debuff player based on what opponent sent
                             break;
                         }
@@ -1749,12 +1751,16 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         {
                             //waitScreen()
                             waitScreen();
+                            //TODO set up debuffs on wait screen
                             //run code to setup debuff screen and wait for next question
                         }
                         case "START TIMER":
                         {
                             //startTiming()
+                            if (questionAnswerTimer != null)
+                                questionAnswerTimer.cancel();
                             startTimer();
+
                             //run code to start timer
                             break;
                         }
@@ -1769,21 +1775,27 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                                     Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
                                     Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
 
-                                    waitScreen();
+
                                 }
                             }
+                            timerText.setText("Waiting");
+                            waitScreen();
                             //run code to compare times, if host hasn't hit timer yet, by default opponent wins
                             break;
                         }
                         case "END GAME":
                         {
                             //gotoResults(lines)
+                            String toSend = new String("END GAME\n" + score.get());
+                            Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
+                            enemyScore = lines[1];
                             iAtm.set(10);
                             Intent results = new Intent(MultiplayerGame.this, Results.class);
                             int[] gameResults = new int[3];
                             gameResults[0] = iAtm.get();
                             gameResults[1] = score.get();
-                            gameResults[2] = (gameTime - 1000) / 1000;
+                            gameResults[2] = (20000) / 1000;
                             results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);
@@ -1859,6 +1871,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                 public void onDisconnected(String endpointId)
                 {
                     Log.i(TAG, "onDisconnected: disconnected from the opponent");
+
+                    Toast.makeText(getApplicationContext(), "Opponent Disconnected", Toast.LENGTH_LONG);
                     resetGame();
                 }
             };
@@ -1996,6 +2010,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         questionAnswerTimer.cancel();
         next.setClickable(false);
 
+        timerbtn.setEnabled(false);
+        timerbtn.setAlpha(0.0f);
+        timerbtn.setClickable(false);
+
         b1.setEnabled(false);
         b2.setEnabled(false);
         b3.setEnabled(false);
@@ -2018,6 +2036,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     private void startTimer()
     {
+        question.setTextColor(Color.BLACK);
+        question.setText("Hit before your opponent!");
+
+        timerText.setTextColor(Color.BLACK);
+        timerText.setText("Go!");
         pressedTimer = false;
         b1.setEnabled(false);
         b2.setEnabled(false);
@@ -2043,12 +2066,9 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
             public void onTick(long millisUntilFinished)
             {
-                if (millisUntilFinished % 1000 == 0)
-                {
-                    String count = Long.toString((20000) / 1000);
+                String count = Long.toString(millisUntilFinished / 1000);
                     timerText.setText(count);
                     timeToHitButton = 20000 - millisUntilFinished;
-                }
             }
 
             public void onFinish()
@@ -2063,6 +2083,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     @Override
                     public void onTick(long millisUntilFinished)
                     {
+                        String count = Long.toString(millisUntilFinished / 1000);
+                        timerText.setText(count);
                     }
 
                     @Override

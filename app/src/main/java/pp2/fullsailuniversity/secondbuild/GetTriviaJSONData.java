@@ -105,7 +105,6 @@ public class GetTriviaJSONData extends AsyncTask<String, Void, List<QuizQuestion
                         ans4.m_answer = fromHTML(ans4.m_answer);
 
                         quizQuestion = new QuizQuestion(question, ans1, ans2, ans3, ans4);
-                        quizQuestion.RandomizeQuestionOrder();
                     }
                     mQuiz.add(quizQuestion);
 
