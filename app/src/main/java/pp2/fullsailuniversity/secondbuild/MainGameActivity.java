@@ -1,11 +1,9 @@
 package pp2.fullsailuniversity.secondbuild;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -38,7 +36,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
 
 
     public static List<QuizQuestion> quiz;
-    public static AtomicInteger i, score;
+    public static AtomicInteger questionIndex, score;
     public static String urlToAPI;
     public static int gameTime;
 
@@ -65,7 +63,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity_game);
         hasStopped = false;
-        i = new AtomicInteger();
+        questionIndex = new AtomicInteger();
         score = new AtomicInteger(0);
 
         Bundle bundle = getIntent().getExtras();
@@ -202,7 +200,6 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
             gameTimer.cancel();
         if (timesup != null)
             timesup.cancel();
-
 
     }
 
@@ -558,13 +555,13 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                             timesup.cancel();
                         next.setEnabled(false);
 
-                        if (i.get() < quiz.size() - 1)
+                        if (questionIndex.get() < quiz.size() - 1)
                         {
-                            i.set(i.get() + 1); //increment index for the game loop
-                            GameLoop(i.get()); //call game loop with new index value
+                            questionIndex.set(questionIndex.get() + 1); //increment index for the game loop
+                            GameLoop(questionIndex.get()); //call game loop with new index value
                         } else
                         {
-                            i.set(quiz.size());
+                            questionIndex.set(quiz.size());
                             Intent results = new Intent(MainGameActivity.this, Results.class);
                             tickingSound.release();
                             loopingElectro.release();
@@ -574,7 +571,7 @@ public class MainGameActivity extends AppCompatActivity implements GetTriviaJSON
                             loopingElectro = null;
                             alarm = null;
                             int[] gameResults = new int[3];
-                            gameResults[0] = i.get();
+                            gameResults[0] = questionIndex.get();
                             gameResults[1] = score.get();
                             gameResults[2] = (gameTime - 1000) / 1000;
                             results.putExtra("gameResults", gameResults);

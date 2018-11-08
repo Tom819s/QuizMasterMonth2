@@ -1,66 +1,28 @@
 package pp2.fullsailuniversity.secondbuild;
 
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import android.media.MediaPlayer;
-import android.os.CountDownTimer;
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputEditText;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.util.SimpleArrayMap;
-import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.method.ScrollingMovementMethod;
-import android.text.style.ForegroundColorSpan;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,10 +38,13 @@ import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback;
 import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate.Status;
 import com.google.android.gms.nearby.connection.Strategy;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable
@@ -193,9 +158,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         b3.setAlpha(0.0f);
         b4.setClickable(false);
         b4.setAlpha(0.0f);
+        GetTriviaJSONData getTriviaJSONData;
 
-        GetTriviaJSONData getTriviaJSONData = new GetTriviaJSONData(this, urlToAPI);
-        getTriviaJSONData.execute(urlToAPI);
+        if (isHost)
+        {
+            getTriviaJSONData = new GetTriviaJSONData(this, urlToAPI);
+            getTriviaJSONData.execute(urlToAPI);
+        }
 
 
         gameTimer = new CountDownTimer(20000, 250)
@@ -584,6 +553,11 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 // set string values for the questions
             next.setOnClickListener((view) ->
                     {
+
+                        String tosend = "START TIMER";
+                        Payload chatPayload = Payload.fromBytes(tosend.getBytes());
+                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+
                         gameTimer.cancel();
                         if (timesup != null)
                             timesup.cancel();
@@ -695,11 +669,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         b3.setBackgroundColor(Color.GREEN);
                     else if (b4.getTag() == "true")
                         b4.setBackgroundColor(Color.GREEN);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Wrong!";
-//                    int duration = Toast.LENGTH_SHORT;
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
                 }
 
                 scorecounter.setText("Score: " + score.toString());
@@ -793,12 +762,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         b4.setBackgroundColor(Color.GREEN);
 
                     b2.setBackgroundColor(Color.RED);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Wrong!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
                 }
                 scorecounter.setText("Score: " + score.toString());
             });
@@ -887,13 +850,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     b3.setBackgroundColor(Color.RED);
                     timerText.setTextColor(Color.RED);
                     timerText.setText("Wrong!");
-//                    timerText.setTextColor(Color.RED);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Wrong!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
                 }
                 scorecounter.setText("Score: " + score.toString());
             });
@@ -980,12 +936,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                     else if (b3.getTag() == "true")
                         b3.setBackgroundColor(Color.GREEN);
                     b4.setBackgroundColor(Color.RED);
-//                    Context context = getApplicationContext();
-//                    CharSequence text = "Wrong!";
-//                    int duration = Toast.LENGTH_SHORT;
-//
-//                    Toast toast = Toast.makeText(context, text, duration);
-//                    toast.show();
                 }
                 scorecounter.setText("Score: " + score.toString());
 
