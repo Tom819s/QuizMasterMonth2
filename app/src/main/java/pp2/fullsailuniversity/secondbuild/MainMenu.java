@@ -60,7 +60,6 @@ public class MainMenu extends AppCompatActivity
         quickStart = findViewById(R.id.quickstartButton);
         multi = findViewById(R.id.multiPB);
         lobby = findViewById(R.id.lobbyPB);
-        lobby.setEnabled(false);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
         {
@@ -112,7 +111,26 @@ public class MainMenu extends AppCompatActivity
                 menuMusic.release();
                 menuMusic = null;
                 finish();
-                Intent goToGame = new Intent(MainMenu.this, SetupMultiplayer.class);
+                Intent goToGame = new Intent(MainMenu.this, MultiplayerGameHost.class);
+                startActivity(goToGame);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
+            }
+        });
+
+
+        lobby.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+
+                if (menuMusic.isPlaying())
+                    menuMusic.stop();
+                menuMusic.release();
+                menuMusic = null;
+                finish();
+                Intent goToGame = new Intent(MainMenu.this, MultiplayerGame.class);
                 startActivity(goToGame);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 

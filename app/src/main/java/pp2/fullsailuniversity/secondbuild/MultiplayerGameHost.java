@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable {
+public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJSONData.OnDataAvailable {
     private static final String TAG = "MainActivityGame";
 
 
@@ -60,7 +60,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     // Our randomly generated name
     private final static String SERVICE_ID = "TRIVIAMASTERYAPP";
-
 
     private static final String[] REQUIRED_PERMISSIONS =
             new String[]{
@@ -73,12 +72,12 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     private static final int REQUEST_CODE_REQUIRED_PERMISSIONS = 1;
 
+    private static final Strategy STRATEGY = Strategy.P2P_STAR;
     private String opponentEndpointId;
     private String opponentName, userName;
     private TextView statusText;
     private TextView scoreText;
 
-    private static final Strategy STRATEGY = Strategy.P2P_STAR;
     public static List<QuizQuestion> quiz;
     public static AtomicInteger iAtm, score;
     public static String urlToAPI;
@@ -87,6 +86,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     private long millisToAnswer, timeLeft, moveonLeft, timeToHitButton;
     private TextView question;
     private TextView timerText;
+    private ProgressBar pbar;
     private TextView scorecounter, questioncounter;
     public static boolean hints, isHost, pressedTimer;
     private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
@@ -105,6 +105,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         Log.d(TAG, "onCreate: starts");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.multi_game);
+
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         userName = wm.getConnectionInfo().getMacAddress();
         hasStopped = false;
@@ -113,8 +114,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
         gameTime = 20000;
         Log.d(TAG, "onCreate: gametime" + gameTime);
-
-        ProgressBar pbar = findViewById(R.id.progressBarMulti);
+        pbar = findViewById(R.id.progressBarMulti);
         b1 = findViewById(R.id.button1Multi);
         b2 = findViewById(R.id.button2Multi);
         b3 = findViewById(R.id.button3Multi);
@@ -130,10 +130,10 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         statusText = findViewById(R.id.statusTextMulti);
         connectionsClient = Nearby.getConnectionsClient(this);
 
+        advertiseConnection();
+
         timerbtn.setClickable(false);
         timerbtn.setAlpha(0.0f);
-
-        findConnection();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -151,9 +151,9 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
 
 
-        loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
-        tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
-        alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
+        loopingElectro = MediaPlayer.create(MultiplayerGameHost.this, R.raw.gameplaymusicelectro);
+        tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
+        alarm = MediaPlayer.create(MultiplayerGameHost.this, R.raw.alarmringing);
 
 
         loopingElectro.setLooping(true);
@@ -171,6 +171,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         b3.setAlpha(0.0f);
         b4.setClickable(false);
         b4.setAlpha(0.0f);
+        GetTriviaJSONData getTriviaJSONData;
+
+        if (isHost) {
+            urlToAPI = "https://opentdb.com/api.php?amount=10";
+            getTriviaJSONData = new GetTriviaJSONData(this, urlToAPI);
+            getTriviaJSONData.execute(urlToAPI);
+        }
 
 
         gameTimer = new CountDownTimer(20000, 250) {
@@ -183,16 +190,20 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             @Override
             public void onFinish() {
 
+                Context context = getApplicationContext();
+                CharSequence text = "Problem Loading";
+                int duration = Toast.LENGTH_LONG;
 
-                Toast.makeText(getApplicationContext(), "Problem Loading", Toast.LENGTH_LONG).show();
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
         }.start();
 
 
         startbtn.setOnClickListener(v ->
                 {
-
-                    if (opponentEndpointId != null) {
+                    Log.d(TAG, "startbutton " + opponentEndpointId);
+                    if (quiz != null && quiz.size() > 0 && opponentEndpointId != null) {
                         gameTimer.cancel();
                         pbar.setAlpha(0.0f);
                         pbar.setClickable(false);
@@ -216,19 +227,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
     }
 
     @Override
-    @TargetApi(23)
-    protected void onStart()
-    {
-        super.onStart();
-
-        if (!hasPermissions(this, REQUIRED_PERMISSIONS))
-        {
-            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
-        }
-    }
-
-
-    @Override
     public void onBackPressed() {
 
         if (loopingElectro.isPlaying())
@@ -238,6 +236,19 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         if (timesup != null)
             timesup.cancel();
         leaveGame();
+    }
+
+
+    @Override
+    @TargetApi(23)
+    protected void onStart()
+    {
+        super.onStart();
+
+        if (!hasPermissions(this, REQUIRED_PERMISSIONS))
+        {
+            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_REQUIRED_PERMISSIONS);
+        }
     }
 
     @Override
@@ -263,13 +274,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
         if (hasStopped) {
             if (!loopingElectro.isPlaying()) {
-                loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
+                loopingElectro = MediaPlayer.create(MultiplayerGameHost.this, R.raw.gameplaymusicelectro);
                 loopingElectro.setLooping(true);
                 loopingElectro.start();
             }
-            tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
-            alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
-            correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
+            tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
+            alarm = MediaPlayer.create(MultiplayerGameHost.this, R.raw.alarmringing);
+            correctSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.correct);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -379,7 +390,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         if (quiz != null && index < quiz.size()) {
             tickingSound.stop();
             tickingSound.release();
-            tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
+            tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
 
             List<Button> buttons = new ArrayList<Button>();
             buttons.add(b1);
@@ -543,7 +554,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             GameLoop(iAtm.get()); //call game loop with new index value
                         } else {
                             iAtm.set(quiz.size());
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
+                            Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
                             gameResults[0] = iAtm.get();
                             gameResults[1] = score.get();
@@ -882,7 +893,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     public void leaveGame() {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(MultiplayerGame.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(MultiplayerGameHost.this);
 
         builder.setCancelable(false);
         builder.setTitle("Leave Game");
@@ -900,7 +911,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             public void onClick(DialogInterface dialog, int which) {
                 tickingSound.stop();
                 gameTimer.cancel();
-                Intent menuActivity = new Intent(MultiplayerGame.this, MainMenu.class);
+                Intent menuActivity = new Intent(MultiplayerGameHost.this, MainMenu.class);
                 finish();
                 startActivity(menuActivity);
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
@@ -929,7 +940,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
         if (questionTransfered != null) {
             tickingSound.stop();
             tickingSound.release();
-            tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
+            tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
 
             List<Button> buttons = new ArrayList<Button>();
             buttons.add(b1);
@@ -1093,7 +1104,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             startTimer(); //call game loop with new index value
                         } else {
                             iAtm.set(quiz.size());
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
+                            Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
                             gameResults[0] = iAtm.get();
                             gameResults[1] = score.get();
@@ -1562,7 +1573,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                         case "END GAME": {
                             //gotoResults(lines)
                             iAtm.set(quiz.size());
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
+                            Intent results = new Intent(MultiplayerGameHost.this, Results.class);
                             int[] gameResults = new int[3];
                             gameResults[0] = iAtm.get();
                             gameResults[1] = score.get();
@@ -1637,14 +1648,14 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     @Override
     protected void onStop() {
-        if (connectionsClient != null)
+        if (connectionsClient!= null)
         connectionsClient.stopAllEndpoints();
         resetGame();
 
         super.onStop();
     }
 
-    public void advertiseConnection(View view) {
+    public void advertiseConnection() {
 
         setStatusText("Searching....");
         isHost = true;
@@ -1681,13 +1692,13 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 setStatusText("not DISCOVERING!");
-                                Log.d(TAG, "onFailure: " + e.getMessage());
                                 Toast.makeText(getApplicationContext(), "Something went wrong with the connection", Toast.LENGTH_LONG).show();
                             }
                         });
     }
 
     private void startAdvertising() {
+
         AdvertisingOptions.Builder options = new AdvertisingOptions.Builder().setStrategy(STRATEGY);
         Nearby.getConnectionsClient(getApplicationContext()).startAdvertising(
                 userName,
@@ -1726,13 +1737,15 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
     private void sendQuizQuestion(int i) {
         if (isHost) {
+            Log.d(TAG, "sendQuizQuestion: " + quiz.get(i).toString());
             Payload chatPayload = Payload.fromBytes(quiz.get(i).toString().getBytes());
             Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
         }
     }
 
-    public void clickAnswerTimer(View V) {
+    public void clickAnswerTimer(View v) {
         pressedTimer = true;
+        Log.d(TAG, "clickAnswerTimer: clicked");
         String timeToPress = "TIMER SUBMITTED\n" + timeToHitButton;
         Payload timerPayload = Payload.fromBytes(timeToPress.toString().getBytes());
         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, timerPayload);
@@ -1789,8 +1802,9 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
             public void onTick(long millisUntilFinished) {
                 if (millisUntilFinished % 1000 == 0) {
-                    String count = Long.toString((20000) / 1000);
-                    timerText.setText(count);
+
+                    Log.d(TAG, "onTick: " + millisUntilFinished);
+                    timerText.setText(Long.toString((millisUntilFinished) / 1000));
                     timeToHitButton = 20000 - millisUntilFinished;
                 }
             }
@@ -1818,7 +1832,6 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
 
 
     }
-
     private static boolean hasPermissions(Context context, String... permissions)
     {
         for (String permission : permissions)
