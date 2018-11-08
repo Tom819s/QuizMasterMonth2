@@ -36,7 +36,7 @@ public class QuizQuestion implements Serializable
     {
         String quizString = new String();
 
-        Log.d("quizquestion to string", "toString: " + questionString );
+        Log.d("quizquestion to string", "toString: " + questionString);
         if (answers != null)
         {
             Log.d("quizquestion to string ", "toString: " + answers[0].m_answer + '\n' + whichIsRight());

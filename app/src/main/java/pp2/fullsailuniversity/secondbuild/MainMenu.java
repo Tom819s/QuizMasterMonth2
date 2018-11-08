@@ -125,7 +125,7 @@ public class MainMenu extends AppCompatActivity
             public void onClick(View view)
             {
 
-                if ( menuMusic != null && menuMusic.isPlaying())
+                if (menuMusic != null && menuMusic.isPlaying())
                     menuMusic.stop();
                 menuMusic.release();
                 menuMusic = null;

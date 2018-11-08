@@ -1724,7 +1724,7 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
                             Answer a3 = new Answer(lines[4], false);
                             Answer a4 = new Answer(lines[5], false);
 
-                            receivedQuestion = new QuizQuestion(lines[1], a1,a2,a3,a4);
+                            receivedQuestion = new QuizQuestion(lines[1], a1, a2, a3, a4);
                             receivedQuestion.RandomizeQuestionOrder();
                             GameLoop(receivedQuestion, iAtm.get());
                             //setupScreen(lines)
@@ -2067,8 +2067,8 @@ public class MultiplayerGame extends AppCompatActivity implements GetTriviaJSOND
             public void onTick(long millisUntilFinished)
             {
                 String count = Long.toString(millisUntilFinished / 1000);
-                    timerText.setText(count);
-                    timeToHitButton = 20000 - millisUntilFinished;
+                timerText.setText(count);
+                timeToHitButton = 20000 - millisUntilFinished;
             }
 
             public void onFinish()
