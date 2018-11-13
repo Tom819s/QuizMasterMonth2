@@ -69,7 +69,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/MainMenuTitle"
-        app:layout_constraintVertical_bias="0.885" />
+        app:layout_constraintVertical_bias="0.936" />
 
     <Button
         android:id="@+id/lobbyPB"

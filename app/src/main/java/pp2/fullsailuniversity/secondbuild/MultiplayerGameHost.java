@@ -5,13 +5,13 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -76,7 +76,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     private String opponentEndpointId, enemyScore;
     private String opponentName, userName;
     private TextView statusText;
-    private TextView scoreText;
 
     public static List<QuizQuestion> quiz;
     public static AtomicInteger iAtm, score;
@@ -90,7 +89,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     private TextView scorecounter, questioncounter;
     public static boolean hints, isHost, pressedTimer;
     private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
-    private boolean previouscorrect, hasStopped;
+    private boolean previouscorrect, hasStopped, isFirstQuestion;
     private QuizQuestion receivedQuestion;
     private Button next,
             exit,
@@ -108,8 +107,14 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         super.onCreate(savedInstanceState);
         setContentView(R.layout.multi_game);
 
-        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        userName = wm.getConnectionInfo().getMacAddress();
+
+        GetTriviaJSONData getTriviaJSONData;
+
+        urlToAPI = "https://opentdb.com/api.php?amount=10";
+        getTriviaJSONData = new GetTriviaJSONData(this, urlToAPI);
+        getTriviaJSONData.execute(urlToAPI);
+
+        userName = Build.MODEL;
         hasStopped = false;
         iAtm = new AtomicInteger();
         score = new AtomicInteger(0);
@@ -131,8 +136,8 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         timerText = findViewById(R.id.timerTextViewMulti);
         statusText = findViewById(R.id.statusTextMulti);
         connectionsClient = Nearby.getConnectionsClient(this);
+        isFirstQuestion = true;
 
-        advertiseConnection();
 
         timerbtn.setClickable(false);
         timerbtn.setAlpha(0.0f);
@@ -175,14 +180,9 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         b3.setAlpha(0.0f);
         b4.setClickable(false);
         b4.setAlpha(0.0f);
-        GetTriviaJSONData getTriviaJSONData;
 
-        if (isHost)
-        {
-            urlToAPI = "https://opentdb.com/api.php?amount=10";
-            getTriviaJSONData = new GetTriviaJSONData(this, urlToAPI);
-            getTriviaJSONData.execute(urlToAPI);
-        }
+
+        advertiseConnection();
 
 
         gameTimer = new CountDownTimer(20000, 250)
@@ -197,13 +197,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
             @Override
             public void onFinish()
             {
-
-                Context context = getApplicationContext();
-                CharSequence text = "Problem Loading";
-                int duration = Toast.LENGTH_LONG;
-
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                Toast.makeText(getApplicationContext(), "Problem Loading...", Toast.LENGTH_LONG).show();
             }
         }.start();
 
@@ -226,7 +220,8 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         timerbtn.setOnClickListener(v ->
                 {
 
-                    questionAnswerTimer.cancel();
+                    if (questionAnswerTimer != null)
+                        questionAnswerTimer.cancel();
                     Log.d(TAG, "timerbutton onclick " + opponentEndpointId);
                     pressedTimer = true;
 
@@ -659,7 +654,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                         if (iAtm.get() < quiz.size() - 1)
                         {
-                            iAtm.set(iAtm.get() + 1); //increment index for the game loop
+                            //increment index for the game loop
                             startTimer(); // move back to timer mode
                         } else
                         {
@@ -1275,7 +1270,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                         if (iAtm.get() < quiz.size() - 1)
                         {
-                            iAtm.set(iAtm.get() + 1); //increment index for the game loop
+                            //increment index for the game loop
                             startTimer(); //call game loop with new index value
                         } else
                         {
@@ -1760,8 +1755,69 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                         }
                         case "DEBUFF":
                         {
-                            //takeDamage(lines)
-                            //run code to debuff player based on what opponent sent
+                            Toast.makeText(getApplicationContext(), opponentName + " played a trick on you!", Toast.LENGTH_LONG).show();
+
+                            switch (lines[1])
+                            {
+                                case "TIME":
+                                {
+                                    if (gameTimer != null)
+                                    {
+                                        //perform miracle to fix countdown timer... or
+                                        //TODO new debuff
+                                    }
+                                    break;
+                                }
+                                case "FLIP":
+                                {
+                                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                                    break;
+                                }
+                                case "REARRANGE":
+                                {
+
+                                    quiz.get(iAtm.get()).RandomizeQuestionOrder();
+                                    b1.setText(quiz.get(iAtm.get()).answers[0].m_answer);
+                                    b2.setText(quiz.get(iAtm.get()).answers[1].m_answer);
+                                    b3.setText(quiz.get(iAtm.get()).answers[2].m_answer);
+                                    b4.setText(quiz.get(iAtm.get()).answers[3].m_answer);
+                                    if (quiz.get(iAtm.get()).answers[0].isCorrect)
+
+                                    {
+                                        b1.setTag("true");
+                                    } else
+                                        b1.setTag("false");
+
+                                    if (quiz.get(iAtm.get()).answers[1].isCorrect)
+
+                                    {
+                                        b2.setTag("true");
+                                    } else
+                                        b2.setTag("false");
+
+                                    if (quiz.get(iAtm.get()).answers[2].isCorrect)
+
+                                    {
+                                        b3.setTag("true");
+                                    } else
+                                        b3.setTag("false");
+
+                                    if (quiz.get(iAtm.get()).answers[3].isCorrect)
+
+                                    {
+                                        b4.setTag("true");
+                                    } else
+                                        b4.setTag("false");
+
+
+                                    break;
+                                }
+                                case "FAIL":
+                                {
+                                    next.callOnClick();
+                                    break;
+                                }
+                            }
                             break;
                         }
                         case "WAIT":
@@ -2025,35 +2081,123 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
     private void waitScreen()
     {
-
-        iAtm.set(iAtm.get() + 1);
-        questioncounter.setText(iAtm.get());
         questionAnswerTimer.cancel();
         next.setClickable(false);
+
         timerbtn.setEnabled(false);
         timerbtn.setAlpha(0.0f);
         timerbtn.setClickable(false);
 
-        b1.setEnabled(false);
-        b2.setEnabled(false);
-        b3.setEnabled(false);
-        b4.setEnabled(false);
+// disabled if not enough points
+        //in listener, disable others after deducting points
 
-        b1.setClickable(false);
-        b2.setClickable(false);
-        b3.setClickable(false);
-        b4.setClickable(false);
+        b1.setText("Halve Opponent's time\n5pts");
+        b2.setText("Rearrange Questions\n5pts");
+        b3.setText("Make Opponent Fail Question\n15pts");
+        b4.setText("Rotate Opponent's screen\n10pts");
 
-        b1.setAlpha(0.0f);
-        b2.setAlpha(0.0f);
-        b3.setAlpha(0.0f);
-        b4.setAlpha(0.0f);
+        b1.setEnabled(true);
+        b2.setEnabled(true);
+        b3.setEnabled(true);
+        b4.setEnabled(true);
+
+        b1.setBackgroundColor(Color.LTGRAY);
+        b2.setBackgroundColor(Color.LTGRAY);
+        b3.setBackgroundColor(Color.LTGRAY);
+        b4.setBackgroundColor(Color.LTGRAY);
+
+        b1.setClickable(true);
+        b2.setClickable(true);
+        b3.setClickable(true);
+        b4.setClickable(true);
+
+        b1.setAlpha(1.0f);
+        b2.setAlpha(1.0f);
+        b3.setAlpha(1.0f);
+        b4.setAlpha(1.0f);
+
+
+        b1.setOnClickListener(v ->
+                {//halve time
+
+                    //"TIME"
+                    if (score.get() > 4)
+                    {
+                        String toSend = "TIME";
+                        Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
+                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
+                        score.set(score.get() - 5);
+                        scorecounter.setText("Score: " + score.get());
+                    } else
+                        Toast.makeText(getApplicationContext(), "Not enough points!", Toast.LENGTH_LONG).show();
+                    b1.setEnabled(false);
+                }
+        );
+
+        b2.setOnClickListener(v ->
+                {//rearrange questions
+                    //"REARRANGE"
+                    if (score.get() > 4)
+                    {
+                        String toSend = "REARRANGE";
+                        Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
+                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
+                        score.set(score.get() - 5);
+                        scorecounter.setText("Score: " + score.get());
+                    } else
+                        Toast.makeText(getApplicationContext(), "Not enough points!", Toast.LENGTH_LONG).show();
+                    b2.setEnabled(false);
+                }
+        );
+
+        b3.setOnClickListener(v ->
+                {//fail question
+                    //"FAIL"
+                    if (score.get() > 14)
+                    {
+                        String toSend = "FAIL";
+                        Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
+                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
+                        score.set(score.get() - 15);
+                        scorecounter.setText("Score: " + score.get());
+                    } else
+                        Toast.makeText(getApplicationContext(), "Not enough points!", Toast.LENGTH_LONG).show();
+                    b3.setEnabled(false);
+
+                }
+        );
+
+        b4.setOnClickListener(v ->
+                {//flip screen
+                    //"FLIP"
+                    if (score.get() > 9)
+                    {
+                        String toSend = "FLIP";
+                        Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
+                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
+                        score.set(score.get() - 10);
+                        scorecounter.setText("Score: " + score.get());
+                    } else
+                        Toast.makeText(getApplicationContext(), "Not enough points!", Toast.LENGTH_LONG).show();
+
+                    b4.setEnabled(false);
+                }
+        );
+
+
         timerText.setText("Waiting for opponent to finish question");
     }
 
 
     private void startTimer()
     {
+
+        if (!isFirstQuestion)
+            iAtm.set(iAtm.get() + 1);
+
+        questioncounter.setText("Question " + Integer.toString(iAtm.get() + 1));
+
+        isFirstQuestion = false;
 
         question.setTextColor(Color.BLACK);
         question.setText("Hit before your opponent!");
