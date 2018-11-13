@@ -2123,7 +2123,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                     //"TIME"
                     if (score.get() > 4)
                     {
-                        String toSend = "TIME";
+                        String toSend = "DEBUFF\nTIME";
                         Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
                         score.set(score.get() - 5);
@@ -2139,7 +2139,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                     //"REARRANGE"
                     if (score.get() > 4)
                     {
-                        String toSend = "REARRANGE";
+                        String toSend = "DEBUFF\nREARRANGE";
                         Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
                         score.set(score.get() - 5);
@@ -2155,7 +2155,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                     //"FAIL"
                     if (score.get() > 14)
                     {
-                        String toSend = "FAIL";
+                        String toSend = "DEBUFF\nFAIL";
                         Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
                         score.set(score.get() - 15);
@@ -2172,7 +2172,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                     //"FLIP"
                     if (score.get() > 9)
                     {
-                        String toSend = "FLIP";
+                        String toSend = "DEBUFF\nFLIP";
                         Payload debuffPayload = Payload.fromBytes(toSend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, debuffPayload);
                         score.set(score.get() - 10);
