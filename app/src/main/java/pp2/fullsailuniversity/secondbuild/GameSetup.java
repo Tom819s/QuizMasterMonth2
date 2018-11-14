@@ -1,11 +1,9 @@
 package pp2.fullsailuniversity.secondbuild;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -13,8 +11,6 @@ import android.widget.NumberPicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameSetup extends AppCompatActivity
 {

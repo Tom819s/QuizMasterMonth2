@@ -6,7 +6,6 @@
     <group android:checkableBehavior="single">
 
 
-
         <item
             android:id="@+id/gameBadges"
             android:icon="@drawable/games_achievements"
@@ -17,7 +16,8 @@
             android:title="@string/leaderboard" />
     </group>
 
-    <item android:title="Settings"
+    <item
+        android:title="Settings"
         tools:ignore="HardcodedText">
         <menu>
             <item
@@ -29,7 +29,6 @@
                 android:icon="@drawable/log_out"
                 android:title="Log Out" />
         </menu>
-
 
 
     </item>
