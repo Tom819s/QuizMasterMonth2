@@ -1881,8 +1881,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                                         b2.setText(text1);
                                         b3.setText(text4);
                                         b4.setText(text2);
-                                    }
-                                    else
+                                    } else
                                     {
 
                                         String text1 = (String) b1.getText();

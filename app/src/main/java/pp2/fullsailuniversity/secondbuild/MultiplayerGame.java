@@ -661,7 +661,6 @@ public class MultiplayerGame extends AppCompatActivity
                     {
 
 
-
                         gameTimer.cancel();
                         if (timesup != null)
                             timesup.cancel();
@@ -1292,8 +1291,8 @@ public class MultiplayerGame extends AppCompatActivity
                                         b2.setText(text1);
                                         b3.setText(text4);
                                         b4.setText(text2);
-                                    }
-                                    else {
+                                    } else
+                                    {
 
                                         String text1 = (String) b1.getText();
                                         String text2 = (String) b3.getText();

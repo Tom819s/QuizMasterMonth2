@@ -5,7 +5,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -48,11 +47,10 @@ public class multiResults extends AppCompatActivity
 
             criteriaText.setText("You: " + score + "\n" + enemyName + ": " + enemyscore);
 
-        }
-        else
+        } else
         {
             resultsText.setText(enemyName + " Wins, you lost");
-            criteriaText.setText(enemyName + ": " + enemyscore + "\nYou: " + score) ;
+            criteriaText.setText(enemyName + ": " + enemyscore + "\nYou: " + score);
             sound = MediaPlayer.create(getApplicationContext(), R.raw.boo);
             sound.start();
         }
@@ -89,9 +87,6 @@ public class multiResults extends AppCompatActivity
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
 
     }
-
-
-
 
 
 }

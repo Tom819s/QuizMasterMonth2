@@ -3,7 +3,6 @@ package pp2.fullsailuniversity.secondbuild;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,9 +29,12 @@ public class multiplayerSetupMatch extends AppCompatActivity
     public void onBackPressed()
     {
 
-            loopSong.stop();
+        loopSong.stop();
 
-        super.onBackPressed();
+        Intent host = new Intent(multiplayerSetupMatch.this, MainMenu.class);
+        finish();
+        startActivity(host);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
     @Override
