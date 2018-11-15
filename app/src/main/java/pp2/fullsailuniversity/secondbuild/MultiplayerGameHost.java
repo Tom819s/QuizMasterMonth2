@@ -1178,9 +1178,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                 }
 
-            }.
-
-                    start();
+            }.start();
 
 
             next.setEnabled(false);
@@ -1763,8 +1761,80 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                                 {
                                     if (gameTimer != null)
                                     {
-                                        //perform miracle to fix countdown timer... or
-                                        //TODO new debuff
+                                        gameTimer.cancel();
+                                        timeLeft = timeLeft / 2;
+                                        gameTimer = new CountDownTimer(timeLeft, 1000)
+                                        {
+                                            @Override
+                                            public void onTick(long millisUntilFinished)
+                                            {
+
+                                                String count = Long.toString(millisUntilFinished / 1000);
+                                                millisToAnswer = gameTime - millisUntilFinished;
+                                                timeLeft = millisUntilFinished;
+                                                if (millisUntilFinished > (gameTime / 2 + 1000))
+                                                {
+                                                    timerText.setTextColor(Color.rgb(0, 204, 0));
+                                                } else if (millisUntilFinished > (gameTime / 4 + 1000))
+                                                {
+                                                    timerText.setTextColor(Color.rgb(255, 204, 0));
+                                                } else
+                                                {
+                                                    if (!tickingSound.isPlaying())
+                                                    {
+                                                        tickingSound.setVolume(5.0f, 5.0f);
+                                                        tickingSound.start();
+                                                    }
+                                                    timerText.setTextColor(Color.rgb(204, 0, 0));
+                                                }
+                                                timerText.setText(count);
+
+                                            }
+
+                                            @Override
+                                            public void onFinish()
+                                            {
+
+                                                tickingSound.stop();
+                                                alarm.setVolume(5.0f, 5.0f);
+                                                alarm.start();
+                                                timerText.setText("Time's Up!");
+                                                b1.setEnabled(false);
+                                                b2.setEnabled(false);
+                                                b3.setEnabled(false);
+                                                b4.setEnabled(false);
+                                                next.setEnabled(true);
+
+                                                if (b1.getTag() == "true")
+                                                    b1.setBackgroundColor(Color.GREEN);
+                                                else if (b2.getTag() == "true")
+                                                    b2.setBackgroundColor(Color.GREEN);
+                                                else if (b3.getTag() == "true")
+                                                    b3.setBackgroundColor(Color.GREEN);
+                                                else if (b4.getTag() == "true")
+                                                    b4.setBackgroundColor(Color.GREEN);
+
+                                                scorecounter.setText("Score: " + score.toString());
+
+                                                timesup = new CountDownTimer(moveonLeft, 1000)
+                                                {
+                                                    @Override
+                                                    public void onTick(long millisUntilFinished)
+                                                    {
+                                                        moveonLeft = millisUntilFinished;
+                                                    }
+
+                                                    @Override
+                                                    public void onFinish()
+                                                    {
+                                                        next.callOnClick();
+                                                    }
+                                                }.start();
+                                                //perform miracle to fix countdown timer... or
+                                                //TODO new debuff
+
+                                            }
+                                        }.start();
                                     }
                                     break;
                                 }
