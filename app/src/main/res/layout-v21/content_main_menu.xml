@@ -35,21 +35,21 @@
         android:id="@+id/quickstartButton"
         android:layout_width="250dp"
         android:layout_height="42dp"
-        android:layout_marginBottom="108dp"
+        android:layout_marginBottom="148dp"
         android:adjustViewBounds="false"
         android:scaleType="centerInside"
         android:text="Quick Start"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/lobbyPB"
+        app:layout_constraintEnd_toEndOf="@+id/multiPB"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/lobbyPB" />
+        app:layout_constraintStart_toStartOf="@+id/multiPB" />
 
     <Button
         android:id="@+id/multiPB"
         android:layout_width="250dp"
         android:layout_height="43dp"
-        android:layout_marginBottom="92dp"
-        android:text="Create Multiplayer Game"
+        android:layout_marginBottom="32dp"
+        android:text="Multiplayer"
         app:layout_constraintBottom_toTopOf="@+id/quickstartButton"
         app:layout_constraintEnd_toEndOf="@+id/singlePB"
         app:layout_constraintHorizontal_bias="0.0"
@@ -69,18 +69,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/MainMenuTitle"
-        app:layout_constraintVertical_bias="0.936" />
-
-    <Button
-        android:id="@+id/lobbyPB"
-        android:layout_width="250dp"
-        android:layout_height="43dp"
-        android:layout_marginBottom="24dp"
-        android:text="Join Multiplayer Game"
-        app:layout_constraintBottom_toTopOf="@+id/quickstartButton"
-        app:layout_constraintEnd_toEndOf="@+id/multiPB"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/multiPB" />
+        app:layout_constraintVertical_bias="0.935" />
 
 
 </android.support.constraint.ConstraintLayout>

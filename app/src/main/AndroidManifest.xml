@@ -49,16 +49,24 @@
 
         <activity
             android:name=".MultiplayerGame"
+            android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
             android:name=".MultiplayerGameHost"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".multiplayerSetupMatch"
             android:screenOrientation="portrait" />
         <activity
             android:name=".SetupMultiplayer"
-            android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".Results"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".multiResults"
             android:screenOrientation="portrait" />
     </application>
 

@@ -88,15 +88,15 @@ public class MultiplayerGame extends AppCompatActivity
     QuizQuestion receivedQuestion;
     private TextView scorecounter, questioncounter;
     public static boolean hints, isHost, pressedTimer;
-    private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
-    private boolean previouscorrect, hasStopped, isFirstQuestion;
+    private int numCorrect, numInRow, numQuestions, rightChime, wrongChime, opponentScore;
+    private boolean previouscorrect, hasStopped, isFirstQuestion, isTF, hasendedgame;
     private Button next,
             exit,
             b1, b2, b3, b4;
     private CountDownTimer gameTimer, timesup, questionAnswerTimer;
     private ImageButton startbtn, timerbtn;
     private SoundPool rightwrongSound;
-    private MediaPlayer correctSound, tickingSound, alarm, loopingElectro;
+    private MediaPlayer tickingSound, alarm, loopingElectro;
 
 
     @Override
@@ -131,6 +131,7 @@ public class MultiplayerGame extends AppCompatActivity
         statusText = findViewById(R.id.statusTextMulti);
         connectionsClient = Nearby.getConnectionsClient(this);
         isFirstQuestion = true;
+        isTF = false;
 
         timerbtn.setClickable(false);
         timerbtn.setAlpha(0.0f);
@@ -155,7 +156,7 @@ public class MultiplayerGame extends AppCompatActivity
         wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
 
 
-        loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.gameplaymusicelectro);
+        loopingElectro = MediaPlayer.create(MultiplayerGame.this, R.raw.pixelsong);
         tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
 
@@ -302,7 +303,6 @@ public class MultiplayerGame extends AppCompatActivity
             }
             tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
             alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
-            correctSound = MediaPlayer.create(MultiplayerGame.this, R.raw.correct);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             {
@@ -544,6 +544,7 @@ public class MultiplayerGame extends AppCompatActivity
             next.setEnabled(false);
             if (!questionTransfered.isTrueFalse)
             {
+                isTF = false;
                 b1.setEnabled(true);
                 b2.setEnabled(true);
                 b3.setEnabled(true);
@@ -615,6 +616,7 @@ public class MultiplayerGame extends AppCompatActivity
                 buttons.remove(randomIndex);
             } else
             {
+                isTF = true;
                 b1.setEnabled(true);
                 b3.setEnabled(true);
                 b2.setEnabled(false);
@@ -658,9 +660,7 @@ public class MultiplayerGame extends AppCompatActivity
             next.setOnClickListener((view) ->
                     {
 
-                        String tosend = "START TIMER";
-                        Payload chatPayload = Payload.fromBytes(tosend.getBytes());
-                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+
 
                         gameTimer.cancel();
                         if (timesup != null)
@@ -669,17 +669,25 @@ public class MultiplayerGame extends AppCompatActivity
 
                         if (iAtm.get() < 9)
                         {
-
+                            String tosend = "START TIMER\n" + score.get();
+                            Payload chatPayload = Payload.fromBytes(tosend.getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
                             //increment index for the game loop
                             startTimer(); //call game loop with new index value
                         } else
                         {
+
+                            String tosend = "END GAME";
+                            Payload chatPayload = Payload.fromBytes(tosend.getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
+
                             iAtm.set(10);
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
-                            int[] gameResults = new int[3];
-                            gameResults[0] = iAtm.get();
-                            gameResults[1] = score.get();
-                            gameResults[2] = (gameTime - 1000) / 1000;
+                            Intent results = new Intent(MultiplayerGame.this, multiResults.class);
+                            String[] gameResults = new String[4];
+                            gameResults[0] = Integer.toString(iAtm.get());
+                            gameResults[1] = Integer.toString(score.get());
+                            gameResults[2] = opponentName;
+                            gameResults[3] = Integer.toString(opponentScore);
                             results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);
@@ -1162,56 +1170,137 @@ public class MultiplayerGame extends AppCompatActivity
                             {
                                 case "TIME":
                                 {
-                                    Log.d(TAG, "onPayloadReceived: Time");
                                     if (gameTimer != null)
                                     {
-                                        //perform miracle to fix countdown timer... or
-                                        //TODO new debuff
+
+                                        tickingSound = MediaPlayer.create(MultiplayerGame.this, R.raw.tickingclock);
+                                        alarm = MediaPlayer.create(MultiplayerGame.this, R.raw.alarmringing);
+
+                                        gameTimer.cancel();
+                                        timeLeft = timeLeft / 2;
+                                        gameTimer = new CountDownTimer(timeLeft, 1000)
+                                        {
+                                            @Override
+                                            public void onTick(long millisUntilFinished)
+                                            {
+
+                                                String count = Long.toString(millisUntilFinished / 1000);
+                                                millisToAnswer = gameTime - millisUntilFinished;
+                                                timeLeft = millisUntilFinished;
+                                                if (millisUntilFinished > (gameTime / 2 + 1000))
+                                                {
+                                                    timerText.setTextColor(Color.rgb(0, 204, 0));
+                                                } else if (millisUntilFinished > (gameTime / 4 + 1000))
+                                                {
+                                                    timerText.setTextColor(Color.rgb(255, 204, 0));
+                                                } else
+                                                {
+                                                    if (!tickingSound.isPlaying())
+                                                    {
+                                                        tickingSound.setVolume(5.0f, 5.0f);
+                                                        tickingSound.start();
+                                                    }
+                                                    timerText.setTextColor(Color.rgb(204, 0, 0));
+                                                }
+                                                timerText.setText(count);
+
+                                            }
+
+                                            @Override
+                                            public void onFinish()
+                                            {
+
+                                                tickingSound.stop();
+                                                alarm.setVolume(5.0f, 5.0f);
+                                                alarm.start();
+                                                timerText.setText("Time's Up!");
+                                                b1.setEnabled(false);
+                                                b2.setEnabled(false);
+                                                b3.setEnabled(false);
+                                                b4.setEnabled(false);
+                                                next.setEnabled(true);
+
+                                                if (b1.getTag() == "true")
+                                                    b1.setBackgroundColor(Color.GREEN);
+                                                else if (b2.getTag() == "true")
+                                                    b2.setBackgroundColor(Color.GREEN);
+                                                else if (b3.getTag() == "true")
+                                                    b3.setBackgroundColor(Color.GREEN);
+                                                else if (b4.getTag() == "true")
+                                                    b4.setBackgroundColor(Color.GREEN);
+
+                                                scorecounter.setText("Score: " + score.toString());
+
+                                                timesup = new CountDownTimer(moveonLeft, 1000)
+                                                {
+                                                    @Override
+                                                    public void onTick(long millisUntilFinished)
+                                                    {
+                                                        moveonLeft = millisUntilFinished;
+                                                    }
+
+                                                    @Override
+                                                    public void onFinish()
+                                                    {
+                                                        next.callOnClick();
+                                                    }
+                                                }.start();
+
+                                            }
+                                        }.start();
                                     }
                                     break;
                                 }
                                 case "FLIP":
                                 {
+
                                     Log.d(TAG, "onPayloadReceived: flip");
-                                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                                    int orientation = getRequestedOrientation();
+
+                                    CountDownTimer a = new CountDownTimer(3000, 125)
+                                    {
+                                        @Override
+                                        public void onTick(long millisUntilFinished)
+                                        {
+                                            if (millisUntilFinished % 2 == 0)
+                                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                                            else
+                                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+                                        }
+
+                                        @Override
+                                        public void onFinish()
+                                        {
+
+                                            setRequestedOrientation(orientation);
+                                        }
+                                    }.start();
                                     break;
                                 }
                                 case "REARRANGE":
                                 {
-                                    Log.d(TAG, "onPayloadReceived: rearrange");
-                                    receivedQuestion.RandomizeQuestionOrder();
-                                    b1.setText(receivedQuestion.answers[0].m_answer);
-                                    b2.setText(receivedQuestion.answers[1].m_answer);
-                                    b3.setText(receivedQuestion.answers[2].m_answer);
-                                    b4.setText(receivedQuestion.answers[3].m_answer);
-                                    if (receivedQuestion.answers[0].isCorrect)
-
+                                    if (!isTF)
                                     {
-                                        b1.setTag("true");
-                                    } else
-                                        b1.setTag("false");
 
-                                    if (receivedQuestion.answers[1].isCorrect)
 
-                                    {
-                                        b2.setTag("true");
-                                    } else
-                                        b2.setTag("false");
+                                        String text1 = (String) b1.getText();
+                                        String text2 = (String) b2.getText();
+                                        String text3 = (String) b3.getText();
+                                        String text4 = (String) b4.getText();
 
-                                    if (receivedQuestion.answers[2].isCorrect)
+                                        b1.setText(text3);
+                                        b2.setText(text1);
+                                        b3.setText(text4);
+                                        b4.setText(text2);
+                                    }
+                                    else {
 
-                                    {
-                                        b3.setTag("true");
-                                    } else
-                                        b3.setTag("false");
+                                        String text1 = (String) b1.getText();
+                                        String text2 = (String) b3.getText();
 
-                                    if (receivedQuestion.answers[3].isCorrect)
-
-                                    {
-                                        b4.setTag("true");
-                                    } else
-                                        b4.setTag("false");
-
+                                        b1.setText(text2);
+                                        b3.setText(text1);
+                                    }
                                     break;
                                 }
                                 case "FAIL":
@@ -1235,6 +1324,12 @@ public class MultiplayerGame extends AppCompatActivity
                             //startTiming()
                             if (questionAnswerTimer != null)
                                 questionAnswerTimer.cancel();
+
+                            Log.d(TAG, "onPayloadReceived: " + lines[1]);
+                            if (lines[1] != null)
+                                opponentScore = Integer.parseInt(lines[1]);
+                            else
+                                opponentScore = 0;
                             startTimer();
 
                             //run code to start timer
@@ -1263,16 +1358,14 @@ public class MultiplayerGame extends AppCompatActivity
                         case "END GAME":
                         {
                             //gotoResults(lines)
-                            String toSend = new String("END GAME\n" + score.get());
-                            Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
-                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
                             enemyScore = lines[1];
                             iAtm.set(10);
-                            Intent results = new Intent(MultiplayerGame.this, Results.class);
-                            int[] gameResults = new int[3];
-                            gameResults[0] = iAtm.get();
-                            gameResults[1] = score.get();
-                            gameResults[2] = (20000) / 1000;
+                            Intent results = new Intent(MultiplayerGame.this, multiResults.class);
+                            String[] gameResults = new String[4];
+                            gameResults[0] = Integer.toString(iAtm.get());
+                            gameResults[1] = Integer.toString(score.get());
+                            gameResults[2] = opponentName;
+                            gameResults[3] = Integer.toString(opponentScore);
                             results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);

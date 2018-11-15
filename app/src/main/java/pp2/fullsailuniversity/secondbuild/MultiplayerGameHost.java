@@ -88,8 +88,8 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
     private ProgressBar pbar;
     private TextView scorecounter, questioncounter;
     public static boolean hints, isHost, pressedTimer;
-    private int numCorrect, numInRow, numQuestions, rightChime, wrongChime;
-    private boolean previouscorrect, hasStopped, isFirstQuestion;
+    private int numCorrect, numInRow, numQuestions, rightChime, wrongChime, opponentScore;
+    private boolean previouscorrect, hasStopped, isFirstQuestion, isTF;
     private QuizQuestion receivedQuestion;
     private Button next,
             exit,
@@ -137,6 +137,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         statusText = findViewById(R.id.statusTextMulti);
         connectionsClient = Nearby.getConnectionsClient(this);
         isFirstQuestion = true;
+        isTF = false;
 
 
         timerbtn.setClickable(false);
@@ -160,7 +161,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
         wrongChime = rightwrongSound.load(this, R.raw.wrong, 1);
 
 
-        loopingElectro = MediaPlayer.create(MultiplayerGameHost.this, R.raw.gameplaymusicelectro);
+        loopingElectro = MediaPlayer.create(MultiplayerGameHost.this, R.raw.pixelsong);
         tickingSound = MediaPlayer.create(MultiplayerGameHost.this, R.raw.tickingclock);
         alarm = MediaPlayer.create(MultiplayerGameHost.this, R.raw.alarmringing);
 
@@ -527,6 +528,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
             next.setEnabled(false);
             if (!quiz.get(index).isTrueFalse)
             {
+                isTF = false;
                 b1.setEnabled(true);
                 b2.setEnabled(true);
                 b3.setEnabled(true);
@@ -598,7 +600,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                 buttons.remove(randomIndex);
             } else
             {
-
+                isTF = true;
                 b1.setEnabled(true);
                 b3.setEnabled(true);
                 b2.setEnabled(false);
@@ -641,11 +643,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
             next.setOnClickListener((view) ->
                     {
 
-                        question.setText(" ");
-                        timerText.setText(" ");
-                        String tosend = "START TIMER";
-                        Payload chatPayload = Payload.fromBytes(tosend.getBytes());
-                        Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
 
                         gameTimer.cancel();
                         if (timesup != null)
@@ -654,22 +651,28 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                         if (iAtm.get() < quiz.size() - 1)
                         {
+                            question.setText(" ");
+                            timerText.setText(" ");
+                            String tosend = "START TIMER\n" + score.get();
+                            Payload chatPayload = Payload.fromBytes(tosend.getBytes());
+                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
                             //increment index for the game loop
                             startTimer(); // move back to timer mode
                         } else
                         {
                             iAtm.set(quiz.size());
-                            Intent results = new Intent(MultiplayerGameHost.this, Results.class);
-                            int[] gameResults = new int[3];
-
+                            Intent results = new Intent(MultiplayerGameHost.this, multiResults.class);
 
                             String toSend = new String("END GAME\n" + score.get());
                             Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
                             Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
 
-                            gameResults[0] = iAtm.get();
-                            gameResults[1] = score.get();
-                            gameResults[2] = (gameTime - 1000) / 1000;
+                            String[] gameResults = new String[4];
+                            gameResults[0] = Integer.toString(iAtm.get());
+                            gameResults[1] = Integer.toString(score.get());
+                            gameResults[2] = opponentName;
+                            gameResults[3] = Integer.toString(opponentScore);
+
                             results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);
@@ -1257,7 +1260,7 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
             next.setOnClickListener((view) ->
                     {
 
-                        String tosend = "START TIMER";
+                        String tosend = "START TIMER\n" + score.get();
                         Payload chatPayload = Payload.fromBytes(tosend.getBytes());
                         Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, chatPayload);
 
@@ -1840,46 +1843,54 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                                 }
                                 case "FLIP":
                                 {
-                                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+
+                                    Log.d(TAG, "onPayloadReceived: flip");
+                                    int orientation = getRequestedOrientation();
+                                    CountDownTimer a = new CountDownTimer(3000, 125)
+                                    {
+                                        @Override
+                                        public void onTick(long millisUntilFinished)
+                                        {
+                                            if (millisUntilFinished % 2 == 0)
+                                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+                                            else
+                                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+                                        }
+
+                                        @Override
+                                        public void onFinish()
+                                        {
+
+                                            setRequestedOrientation(orientation);
+                                        }
+                                    }.start();
                                     break;
                                 }
                                 case "REARRANGE":
                                 {
-
-                                    quiz.get(iAtm.get()).RandomizeQuestionOrder();
-                                    b1.setText(quiz.get(iAtm.get()).answers[0].m_answer);
-                                    b2.setText(quiz.get(iAtm.get()).answers[1].m_answer);
-                                    b3.setText(quiz.get(iAtm.get()).answers[2].m_answer);
-                                    b4.setText(quiz.get(iAtm.get()).answers[3].m_answer);
-                                    if (quiz.get(iAtm.get()).answers[0].isCorrect)
-
+                                    if (!isTF)
                                     {
-                                        b1.setTag("true");
-                                    } else
-                                        b1.setTag("false");
 
-                                    if (quiz.get(iAtm.get()).answers[1].isCorrect)
 
+                                        String text1 = (String) b1.getText();
+                                        String text2 = (String) b2.getText();
+                                        String text3 = (String) b3.getText();
+                                        String text4 = (String) b4.getText();
+
+                                        b1.setText(text3);
+                                        b2.setText(text1);
+                                        b3.setText(text4);
+                                        b4.setText(text2);
+                                    }
+                                    else
                                     {
-                                        b2.setTag("true");
-                                    } else
-                                        b2.setTag("false");
 
-                                    if (quiz.get(iAtm.get()).answers[2].isCorrect)
+                                        String text1 = (String) b1.getText();
+                                        String text2 = (String) b3.getText();
 
-                                    {
-                                        b3.setTag("true");
-                                    } else
-                                        b3.setTag("false");
-
-                                    if (quiz.get(iAtm.get()).answers[3].isCorrect)
-
-                                    {
-                                        b4.setTag("true");
-                                    } else
-                                        b4.setTag("false");
-
-
+                                        b1.setText(text2);
+                                        b3.setText(text1);
+                                    }
                                     break;
                                 }
                                 case "FAIL":
@@ -1902,6 +1913,10 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
 
                             if (questionAnswerTimer != null)
                                 questionAnswerTimer.cancel();
+                            if (lines[1] != null)
+                                opponentScore = Integer.parseInt(lines[1]);
+                            else
+                                opponentScore = 0;
                             startTimer();
                             //run code to start timer
                             break;
@@ -1916,7 +1931,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                                     QuizQuestion toSend = quiz.get(iAtm.get());
                                     Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
                                     Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
-
                                 }
                                 question.setText("Opponent answered first");
                                 waitScreen();
@@ -1927,18 +1941,15 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                         case "END GAME":
                         {
                             //gotoResults(lines)
-
-                            String toSend = new String("END GAME\n" + score.get());
-                            Payload questionPayload = Payload.fromBytes(toSend.toString().getBytes());
-                            Nearby.getConnectionsClient(getApplicationContext()).sendPayload(opponentEndpointId, questionPayload);
                             enemyScore = lines[1];
 
                             iAtm.set(quiz.size());
-                            Intent results = new Intent(MultiplayerGameHost.this, Results.class);
-                            int[] gameResults = new int[3];
-                            gameResults[0] = iAtm.get();
-                            gameResults[1] = score.get();
-                            gameResults[2] = (gameTime - 1000) / 1000;
+                            Intent results = new Intent(MultiplayerGameHost.this, multiResults.class);
+                            String[] gameResults = new String[4];
+                            gameResults[0] = Integer.toString(iAtm.get());
+                            gameResults[1] = Integer.toString(score.get());
+                            gameResults[2] = opponentName;
+                            gameResults[3] = Integer.toString(opponentScore);
                             results.putExtra("gameResults", gameResults);
                             finish();
                             startActivity(results);

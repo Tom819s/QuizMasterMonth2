@@ -6,7 +6,7 @@
     android:background="#eaf5ff">
 
     <TextView
-        android:id="@+id/resultsText"
+        android:id="@+id/resultsTextMulti"
         android:layout_width="221dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -23,7 +23,7 @@
         app:layout_constraintVertical_bias="0.019" />
 
     <Button
-        android:id="@+id/return_to_menu"
+        android:id="@+id/return_to_menu_multi"
         android:layout_width="137dp"
         android:layout_height="65dp"
         android:layout_marginStart="28dp"
@@ -47,7 +47,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/return_to_menu"
+        app:layout_constraintStart_toEndOf="@+id/return_to_menu_multi"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.996" />
 
@@ -74,9 +74,9 @@
         android:gravity="center"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="@+id/resultsText"
+        app:layout_constraintEnd_toEndOf="@+id/resultsTextMulti"
         app:layout_constraintHorizontal_bias="0.518"
-        app:layout_constraintStart_toStartOf="@+id/resultsText"
-        app:layout_constraintTop_toBottomOf="@+id/resultsText" />
+        app:layout_constraintStart_toStartOf="@+id/resultsTextMulti"
+        app:layout_constraintTop_toBottomOf="@+id/resultsTextMulti" />
 
 </android.support.constraint.ConstraintLayout>

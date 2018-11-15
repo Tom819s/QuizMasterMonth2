@@ -37,7 +37,7 @@ public class MainMenu extends AppCompatActivity
     private static final int REQ_CODE = 101;
 
 
-    public Button multi, lobby, quickStart;
+    public Button multi, quickStart;
     private static String[] userDataInformation;
     private MediaPlayer menuMusic;
 
@@ -55,7 +55,6 @@ public class MainMenu extends AppCompatActivity
         setSupportActionBar(toolbar);
         quickStart = findViewById(R.id.quickstartButton);
         multi = findViewById(R.id.multiPB);
-        lobby = findViewById(R.id.lobbyPB);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
         {
@@ -107,31 +106,13 @@ public class MainMenu extends AppCompatActivity
                 menuMusic.release();
                 menuMusic = null;
                 finish();
-                Intent goToGame = new Intent(MainMenu.this, MultiplayerGameHost.class);
+                Intent goToGame = new Intent(MainMenu.this, multiplayerSetupMatch.class);
                 startActivity(goToGame);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
             }
         });
 
-
-        lobby.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-
-                if (menuMusic != null && menuMusic.isPlaying())
-                    menuMusic.stop();
-                menuMusic.release();
-                menuMusic = null;
-                finish();
-                Intent goToGame = new Intent(MainMenu.this, MultiplayerGame.class);
-                startActivity(goToGame);
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-
-            }
-        });
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
