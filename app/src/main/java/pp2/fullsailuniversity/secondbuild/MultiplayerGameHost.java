@@ -1941,7 +1941,6 @@ public class MultiplayerGameHost extends AppCompatActivity implements GetTriviaJ
                         case "END GAME":
                         {
                             //gotoResults(lines)
-                            enemyScore = lines[1];
 
                             iAtm.set(quiz.size());
                             Intent results = new Intent(MultiplayerGameHost.this, multiResults.class);
