@@ -37,6 +37,7 @@ public class GameSetup extends AppCompatActivity
         categoriesRadio = findViewById(R.id.radioGroupCategory);
         difficultiesRadio = findViewById(R.id.radioGroupDifficulty);
         typeRadio = findViewById(R.id.radioGroupType);
+        
         numpicker = findViewById(R.id.numQuestionPicker);
         numpicker.setMinValue(10);
         numpicker.setMaxValue(30);
